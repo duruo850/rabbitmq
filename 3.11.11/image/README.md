@@ -1,6 +1,6 @@
 # Introduction
 
-rabbitmq 3.8.9  支持mqtt转amqp协议
+rabbitmq 3.11.11  支持mqtt转amqp协议
 
 容器启动的时候默认创建一个topic：exchange_mqtt_topic，type=topic auto_delete=false durable=true
 
@@ -12,10 +12,7 @@ rabbitmq mqtt管理员帐号密码： mqtt_admin rbmqmqtt_07231816
 
 # build
 
-    docker build -t duruo850/rabbitmq:3.8.9-management-alpine --no-cache .
-    
-    不允许匿名登陆 的
-    sudo docker build -t duruo850/rabbitmq:3.8.9-management-alpine_not_anonymous --no-cache .
+    docker build -t duruo850/rabbitmq:3.11.11-management-alpine --no-cache .
 
 
 # Environment variables
@@ -26,7 +23,5 @@ rabbitmq mqtt管理员帐号密码： mqtt_admin rbmqmqtt_07231816
 ## Common
 
     # 简单启动rabbitmq，用户密码为system:rbmqu0101081710, 虚拟地址为/
-    docker run -d --name rabbitmq --restart=always -p 1883:1883 -p 5672:5672 -p 15672:15672 -p 15675:15675 duruo850/rabbitmq:3.8.9-management-alpine
-    
-    # 不允许匿名登陆
-    docker run -d --name rabbitmq_not_anonymous --restart=always -p 1883:1883 -p 5672:5672 -p 15672:15672 -p 15675:15675 duruo850/rabbitmq:3.8.9-management-alpine_not_anonymous
+    docker run -d --name rabbitmq --restart=always -p 1883:1883 -p 5672:5672 -p 15672:15672 -p 15675:15675 duruo850/rabbitmq:3.11.11-management-alpine
+   
