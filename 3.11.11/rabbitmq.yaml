@@ -5,7 +5,7 @@ metadata:
   name: rabbitmq-management
   namespace: middleware
   labels:
-    app: rabbitmq01
+    app: rabbitmq
 spec:
   ports:
   - port: 15672
@@ -36,7 +36,7 @@ spec:
 apiVersion: apps/v1beta1
 kind: StatefulSet
 metadata:
-  name: rabbitmq01
+  name: rabbitmq
   namespace: middleware
 spec:
   serviceName: rabbitmq
