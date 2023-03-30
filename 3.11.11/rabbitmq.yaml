@@ -49,7 +49,6 @@ spec:
       labels:
         app: rabbitmq
     spec:
-      serviceAccountName: rabbitmq
       containers:
       - name: rabbitmq
         image: duruo850/rabbitmq:3.11.11-management-alpine
