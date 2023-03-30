@@ -39,6 +39,9 @@ metadata:
   name: rabbitmq
   namespace: middleware
 spec:
+  selector:
+    matchLabels:
+      app: rabbitmq
   serviceName: rabbitmq
   replicas: 2
   template:
