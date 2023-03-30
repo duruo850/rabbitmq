@@ -1,11 +1,7 @@
 #!/bin/bash
 
-tag="v3.3.2"
-project="duruo850/kafka"
-
-
 build(){
-    sudo docker build -t $project:$tag .
+    sudo docker build -t duruo850/rabbitmq:3.11.11-management-alpine --no-cache image/
 }
 push(){
     sudo docker push $project:$tag
