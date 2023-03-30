@@ -8,14 +8,16 @@ push(){
 }
 start() {
     echo "start..."
+    sudo kubectl create -f namespace.yaml
     sudo kubectl create -f rabbitmq.yaml
     sudo kubectl create -f rabbitmq.ui.yaml
 }
 
 stop() {
     echo "stop..."
-    sudo kubectl create -f rabbitmq.ui.yaml
-    sudo kubectl create -f rabbitmq.yaml
+    sudo kubectl delete -f rabbitmq.ui.yaml
+    sudo kubectl delete -f rabbitmq.yaml
+    sudo kubectl delete -f namespace.yaml
     sudo rm -rf /opt/kafka_data*
 }
 
