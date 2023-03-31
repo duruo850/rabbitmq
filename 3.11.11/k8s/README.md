@@ -64,21 +64,75 @@
     
 
 ## 集群验证：
-    rabbitmqctl cluster_status 
+
+### 集群验证-rabbitmqctl cluster_status：
+    root@rabbitmq-0:/# rabbitmqctl cluster_status
+    Cluster status of node rabbit@rabbitmq-0.rabbitmq-internal.rabbitmq.svc.cluster.local ...
+    Basics
     
+    Cluster name: rabbit@rabbitmq-0.rabbitmq-internal.rabbitmq.svc.cluster.local
+    Total CPU cores available cluster-wide: 6
+    
+    Disk Nodes
+    
+    rabbit@rabbitmq-0.rabbitmq-internal.rabbitmq.svc.cluster.local
+    rabbit@rabbitmq-1.rabbitmq-internal.rabbitmq.svc.cluster.local
+    rabbit@rabbitmq-2.rabbitmq-internal.rabbitmq.svc.cluster.local
+    
+    Running Nodes
+    
+    rabbit@rabbitmq-0.rabbitmq-internal.rabbitmq.svc.cluster.local
+    rabbit@rabbitmq-1.rabbitmq-internal.rabbitmq.svc.cluster.local
+    rabbit@rabbitmq-2.rabbitmq-internal.rabbitmq.svc.cluster.local
+    
+    Versions
+    
+    rabbit@rabbitmq-0.rabbitmq-internal.rabbitmq.svc.cluster.local: RabbitMQ 3.11.11 on Erlang 25.3
+    rabbit@rabbitmq-1.rabbitmq-internal.rabbitmq.svc.cluster.local: RabbitMQ 3.11.11 on Erlang 25.3
+    rabbit@rabbitmq-2.rabbitmq-internal.rabbitmq.svc.cluster.local: RabbitMQ 3.11.11 on Erlang 25.3
+    
+    CPU Cores
+    
+    Node: rabbit@rabbitmq-0.rabbitmq-internal.rabbitmq.svc.cluster.local, available CPU cores: 2
+    Node: rabbit@rabbitmq-1.rabbitmq-internal.rabbitmq.svc.cluster.local, available CPU cores: 2
+    Node: rabbit@rabbitmq-2.rabbitmq-internal.rabbitmq.svc.cluster.local, available CPU cores: 2
+    
+    Maintenance status
+    
+    Node: rabbit@rabbitmq-0.rabbitmq-internal.rabbitmq.svc.cluster.local, status: not under maintenance
+    Node: rabbit@rabbitmq-1.rabbitmq-internal.rabbitmq.svc.cluster.local, status: not under maintenance
+    Node: rabbit@rabbitmq-2.rabbitmq-internal.rabbitmq.svc.cluster.local, status: not under maintenance
 
 
-## 集群验证--日志：
+### 集群验证--日志/var/log/rabbitmq/rabbit\@rabbitmq-0.rabbitmq-internal.rabbitmq.svc.cluster.local.log
+    tail -f /var/log/rabbitmq/rabbit\@rabbitmq-0.rabbitmq-internal.rabbitmq.svc.cluster.local.log:
     
-    2021-02-17 03:31:13.467 [info] <0.9.0> Server startup complete; 5 plugins started.
-     * rabbitmq_peer_discovery_k8s
-     * rabbitmq_management
-     * rabbitmq_web_dispatch
-     * rabbitmq_management_agent
-     * rabbitmq_peer_discovery_common
-     completed with 5 plugins.
-    2021-02-17 03:32:30.060 [info] <0.566.0> node 'rabbit@rabbitmq-cluster-1.rabbitmq-cluster.default.svc.cluster.local' up
-    2021-02-17 03:32:31.264 [info] <0.566.0> rabbit on node 'rabbit@rabbitmq-cluster-1.rabbitmq-cluster.default.svc.cluster.local' up
-    2021-02-17 03:33:31.280 [info] <0.566.0> node 'rabbit@rabbitmq-cluster-2.rabbitmq-cluster.default.svc.cluster.local' up
-    2021-02-17 03:33:32.627 [info] <0.566.0> rabbit on node 'rabbit@rabbitmq-cluster-2.rabbitmq-cluster.default.svc.cluster.local' up
+    Feature flags
+    
+    Flag: classic_mirrored_queue_version, state: enabled
+    Flag: classic_queue_type_delivery_support, state: enabled
+    Flag: direct_exchange_routing_v2, state: enabled
+    Flag: drop_unroutable_metric, state: enabled
+    Flag: empty_basic_get_metric, state: enabled
+    Flag: feature_flags_v2, state: enabled
+    Flag: implicit_default_bindings, state: enabled
+    Flag: listener_records_in_ets, state: enabled
+    Flag: maintenance_mode_status, state: enabled
+    Flag: quorum_queue, state: enabled
+    Flag: stream_queue, state: enabled
+    Flag: stream_single_active_consumer, state: enabled
+    Flag: tracking_records_in_ets, state: enabled
+    Flag: user_limits, state: enabled
+    Flag: virtual_host_metadata, state: enabled
+    root@rabbitmq-0:/# tail -f /var/log/rabbitmq/rabbit\@rabbitmq-0.rabbitmq-internal.rabbitmq.svc.cluster.local.log
+    2023-03-31 08:33:03.820636+00:00 [info] <0.724.0> Server startup complete; 5 plugins started.
+    2023-03-31 08:33:03.820636+00:00 [info] <0.724.0>  * rabbitmq_peer_discovery_k8s
+    2023-03-31 08:33:03.820636+00:00 [info] <0.724.0>  * rabbitmq_peer_discovery_common
+    2023-03-31 08:33:03.820636+00:00 [info] <0.724.0>  * rabbitmq_management
+    2023-03-31 08:33:03.820636+00:00 [info] <0.724.0>  * rabbitmq_web_dispatch
+    2023-03-31 08:33:03.820636+00:00 [info] <0.724.0>  * rabbitmq_management_agent
+    2023-03-31 08:34:03.957323+00:00 [info] <0.638.0> node 'rabbit@rabbitmq-1.rabbitmq-internal.rabbitmq.svc.cluster.local' up
+    2023-03-31 08:34:07.136896+00:00 [info] <0.638.0> rabbit on node 'rabbit@rabbitmq-1.rabbitmq-internal.rabbitmq.svc.cluster.local' up
+    2023-03-31 08:35:07.762592+00:00 [info] <0.638.0> node 'rabbit@rabbitmq-2.rabbitmq-internal.rabbitmq.svc.cluster.local' up
+    2023-03-31 08:35:10.314678+00:00 [info] <0.638.0> rabbit on node 'rabbit@rabbitmq-2.rabbitmq-internal.rabbitmq.svc.cluster.local' up
    
