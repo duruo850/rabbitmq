@@ -40,6 +40,8 @@
     sudo rm -rf /opt/rabbitmq_data*
     
 ## MQTT配置支持：
+
+    qiteck@server:~/program/rabbitmq/3.11.11/k8s$ sudo kubectl exec -it rabbitmq-0 -n rabbitmq -- /bin/bash
     
     mqtt服务已经添加，但是mqtt用户需要手动添加
     admin_user=mqtt_admin;
