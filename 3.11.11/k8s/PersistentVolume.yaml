@@ -1,0 +1,45 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: rabbit-pv1
+  labels:
+    type: rabbit
+spec:
+  storageClassName: rabbit
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/opt/rabbit_data1"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: rabbit-pv2
+  labels:
+    type: rabbit
+spec:
+  storageClassName: rabbit
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/opt/rabbit_data2"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: rabbit-pv3
+  labels:
+    type: rabbit
+spec:
+  storageClassName: rabbit
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/opt/rabbit_data3"

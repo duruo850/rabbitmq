@@ -1,0 +1,680 @@
+bplist00Ò_WebMainResource_WebSubresourcesÕ	
+_WebResourceData_WebResourceMIMEType_WebResourceTextEncodingName^WebResourceURL_WebResourceFrameNameOl0<!DOCTYPE html><html lang="en-US"><head>
+    <meta charset="UTF-8">
+
+<!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>RabbitMQ é›†ç¾¤éƒ¨ç½²æ–¹å¼ | Blog</title>
+<meta name="generator" content="Jekyll v3.9.0">
+<meta property="og:title" content="RabbitMQ é›†ç¾¤éƒ¨ç½²æ–¹å¼">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="ä¸ªäººåšå®¢">
+<meta property="og:description" content="ä¸ªäººåšå®¢">
+<link rel="canonical" href="https://zijin-m.github.io/Blog/rabbitmq/k8s-cluster-install.html">
+<meta property="og:url" content="https://zijin-m.github.io/Blog/rabbitmq/k8s-cluster-install.html">
+<meta property="og:site_name" content="Blog">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="RabbitMQ é›†ç¾¤éƒ¨ç½²æ–¹å¼">
+<script type="application/ld+json">
+{"description":"ä¸ªäººåšå®¢","url":"https://zijin-m.github.io/Blog/rabbitmq/k8s-cluster-install.html","@type":"WebPage","headline":"RabbitMQ é›†ç¾¤éƒ¨ç½²æ–¹å¼","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preload" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700&amp;display=swap" as="style" type="text/css" crossorigin="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#157878">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="stylesheet" href="/Blog/assets/css/style.css?v=ea0d461c2309f0dc38599e6b1a542daf54a4d5b4">
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/Blog/favicon.ico" -->
+
+<!-- end custom head snippets -->
+
+  </head>
+  <body>
+    <a id="skip-to-content" href="#content">Skip to the content.</a>
+
+    <header class="page-header" role="banner">
+      <h1 class="project-name">RabbitMQ é›†ç¾¤éƒ¨ç½²æ–¹å¼</h1>
+      <h2 class="project-tagline">ä¸ªäººåšå®¢</h2>
+      
+        <a href="https://github.com/zijin-m/Blog" class="btn">View on GitHub</a>
+      
+      
+    </header>
+
+    <main id="content" class="main-content" role="main">
+      <h1 id="rabbitmq-é›†ç¾¤éƒ¨ç½²æ–¹å¼">RabbitMQ é›†ç¾¤éƒ¨ç½²æ–¹å¼</h1>
+<p>é€šè¿‡å®˜æ–¹é•œåƒ RabbitMQ Docker Image å’Œ rabbitmq-peer-discovery-k8s æ’ä»¶è¿›è¡Œé›†ç¾¤éƒ¨ç½²ã€‚</p>
+
+<h1 id="å‘½åç©ºé—´">å‘½åç©ºé—´</h1>
+
+<p>å°† rabbitmq çš„èµ„æºéƒ½æ”¾åœ¨ rabbitmq å‘½åç©ºé—´å†…ã€‚</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Namespace</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">rabbitmq</span>
+</code></pre></div></div>
+<h1 id="é…ç½®">é…ç½®</h1>
+
+<p>é€šè¿‡é…ç½® configMap å°†é…ç½®æ–‡ä»¶æŒ‚è½½åˆ° rabbitmq å®¹å™¨å†… ã€‚</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">ConfigMap</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">rabbitmq-config</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">rabbitmq</span>
+<span class="na">data</span><span class="pi">:</span>
+  <span class="na">enabled_plugins</span><span class="pi">:</span> <span class="pi">|</span>
+      <span class="s">[rabbitmq_management,rabbitmq_peer_discovery_k8s].</span>
+  <span class="s">rabbitmq.conf</span><span class="pi">:</span> <span class="pi">|</span>
+      <span class="s">## Cluster formation. See https://www.rabbitmq.com/cluster-formation.html to learn more.</span>
+      <span class="s">cluster_formation.randomized_startup_delay_range.min = 0</span>
+      <span class="s">cluster_formation.randomized_startup_delay_range.max = 1</span>
+      <span class="s">cluster_formation.peer_discovery_backend  = rabbit_peer_discovery_k8s</span>
+      <span class="s">cluster_formation.k8s.host = kubernetes.default.svc.cluster.local</span>
+      <span class="s">## Service name is rabbitmq by default but can be overridden using the cluster_formation.k8s.service_name key if needed</span>
+      <span class="s">cluster_formation.k8s.service_name = rabbitmq-internal</span>
+      <span class="s">## It is possible to append a suffix to peer hostnames returned by Kubernetes using cluster_formation.k8s.hostname_suffix</span>
+      <span class="s">cluster_formation.k8s.hostname_suffix = .rabbitmq-internal.rabbitmq.svc.cluster.local</span>
+      <span class="s">## Should RabbitMQ node name be computed from the pod's hostname or IP address?</span>
+      <span class="s">## IP addresses are not stable, so using [stable] hostnames is recommended when possible.</span>
+      <span class="s">## Set to "hostname" to use pod hostnames.</span>
+      <span class="s">## When this value is changed, so should the variable used to set the RABBITMQ_NODENAME</span>
+      <span class="s">## environment variable.</span>
+      <span class="s">cluster_formation.k8s.address_type = hostname</span>
+      <span class="s">## How often should node cleanup checks run?</span>
+      <span class="s">cluster_formation.node_cleanup.interval = 30</span>
+      <span class="s">## Set to false if automatic removal of unknown/absent nodes</span>
+      <span class="s">## is desired. This can be dangerous, see</span>
+      <span class="s">##  * https://www.rabbitmq.com/cluster-formation.html#node-health-checks-and-cleanup</span>
+      <span class="s">##  * https://groups.google.com/forum/#!msg/rabbitmq-users/wuOfzEywHXo/k8z_HWIkBgAJ</span>
+      <span class="s">cluster_formation.node_cleanup.only_log_warning = true</span>
+      <span class="s">cluster_partition_handling = autoheal</span>
+      <span class="s">## See https://www.rabbitmq.com/ha.html#master-migration-data-locality</span>
+      <span class="s">queue_master_locator=min-masters</span>
+      <span class="s">## This is just an example.</span>
+      <span class="s">## This enables remote access for the default user with well known credentials.</span>
+      <span class="s">## Consider deleting the default user and creating a separate user with a set of generated</span>
+      <span class="s">## credentials instead.</span>
+      <span class="s">## Learn more at https://www.rabbitmq.com/access-control.html#loopback-users</span>
+      <span class="s">loopback_users.guest = false</span>
+      <span class="s">## https://www.rabbitmq.com/memory.html#configuring-threshold</span>
+      <span class="s">vm_memory_high_watermark.relative = 0.6</span>
+</code></pre></div></div>
+
+<h1 id="å¯†é’¥">å¯†é’¥</h1>
+
+<p>é€šè¿‡ secrets å°† erlang-cookie å’Œé»˜è®¤ç”¨æˆ·ä¿¡æ¯å†™å…¥åˆ°ç¯å¢ƒå˜é‡ä¸­ã€‚</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Secret</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">rabbitmq-secret</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">rabbitmq</span>
+<span class="na">type</span><span class="pi">:</span> <span class="s">Opaque</span>
+<span class="na">data</span><span class="pi">:</span>
+  <span class="na">RABBITMQ_ERLANG_COOKIE</span><span class="pi">:</span> <span class="s">MTIzajE5dWVkYXM3ZGFkODEwMjNqMTM5ZGph</span>
+  <span class="na">RABBITMQ_DEFAULT_USER</span><span class="pi">:</span> <span class="s">dXNlcg==</span>
+  <span class="na">RABBITMQ_DEFAULT_PASS</span><span class="pi">:</span> <span class="s">cGFzc3dvcmQ=</span>
+</code></pre></div></div>
+<h1 id="rbac">RBAC</h1>
+
+<p>rabbitmq-peer-discovery éœ€è¦ rabc æƒé™æ¥è·å– endpoints  ä¿¡æ¯æ¥åšé›†ç¾¤èŠ‚ç‚¹çš„è‡ªåŠ¨å‘ç°ã€‚</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">ServiceAccount</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">rabbitmq</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">rabbitmq</span>
+<span class="nn">---</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Role</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">rbac.authorization.k8s.io/v1beta1</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">rabbitmq-peer-discovery-rbac</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">rabbitmq</span>
+<span class="na">rules</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="na">apiGroups</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">"</span><span class="pi">]</span>
+  <span class="na">resources</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">endpoints"</span><span class="pi">]</span>
+  <span class="na">verbs</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">get"</span><span class="pi">]</span>
+<span class="nn">---</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">RoleBinding</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">rbac.authorization.k8s.io/v1beta1</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">rabbitmq-peer-discovery-rbac</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">rabbitmq</span>
+<span class="na">subjects</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="na">kind</span><span class="pi">:</span> <span class="s">ServiceAccount</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">rabbitmq</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">rabbitmq</span>
+<span class="na">roleRef</span><span class="pi">:</span>
+  <span class="na">apiGroup</span><span class="pi">:</span> <span class="s">rbac.authorization.k8s.io</span>
+  <span class="na">kind</span><span class="pi">:</span> <span class="s">Role</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">rabbitmq-peer-discovery-rbac</span>
+</code></pre></div></div>
+<h1 id="æœåŠ¡">æœåŠ¡</h1>
+
+<p>å®šä¹‰ headless service ä½œä¸º statefulset çš„æœåŠ¡å…¥å£ã€‚</p>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">kind</span><span class="pi">:</span> <span class="s">Service</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">rabbitmq</span> 
+  <span class="na">name</span><span class="pi">:</span> <span class="s">rabbitmq-internal</span>
+  <span class="na">labels</span><span class="pi">:</span>
+    <span class="na">app</span><span class="pi">:</span> <span class="s">rabbitmq</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">clusterIP</span><span class="pi">:</span> <span class="s">None</span>
+  <span class="na">ports</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">epmd</span>
+      <span class="na">protocol</span><span class="pi">:</span> <span class="s">TCP</span>
+      <span class="na">port</span><span class="pi">:</span> <span class="m">4369</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">amqp</span>
+      <span class="na">protocol</span><span class="pi">:</span> <span class="s">TCP</span>
+      <span class="na">port</span><span class="pi">:</span> <span class="m">5672</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">amqp-tls</span>
+      <span class="na">protocol</span><span class="pi">:</span> <span class="s">TCP</span>
+      <span class="na">port</span><span class="pi">:</span> <span class="m">5671</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">http</span>
+      <span class="na">protocol</span><span class="pi">:</span> <span class="s">TCP</span>
+      <span class="na">port</span><span class="pi">:</span> <span class="m">15672</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">inter-node-cli</span>
+      <span class="na">protocol</span><span class="pi">:</span> <span class="s">TCP</span>
+      <span class="na">port</span><span class="pi">:</span> <span class="m">25672</span>
+  <span class="na">selector</span><span class="pi">:</span>
+    <span class="na">app</span><span class="pi">:</span> <span class="s">rabbitmq</span> 
+</code></pre></div></div>
+<h1 id="æœ‰çŠ¶æ€åº”ç”¨éƒ¨ç½²">æœ‰çŠ¶æ€åº”ç”¨éƒ¨ç½²</h1>
+
+<p>æŒ‰ç…§å®˜æ–¹é›†ç¾¤éƒ¨ç½²çš„æ¨èæ–¹å¼ä½¿ç”¨ StatefulSet æ–¹å¼éƒ¨ç½²ï¼Œä½¿ç”¨åŠ¨æ€å­˜å‚¨å·ä¿å­˜æ•°æ®ã€‚</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">apps/v1</span>
+<span class="c1"># See the Prerequisites section of https://www.rabbitmq.com/cluster-formation.html#peer-discovery-k8s.</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">StatefulSet</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">rabbitmq</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">rabbitmq</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">serviceName</span><span class="pi">:</span> <span class="s">rabbitmq-internal</span>
+  <span class="c1"># Three nodes is the recommended minimum. Some features may require a majority of nodes</span>
+  <span class="c1"># to be available.</span>
+  <span class="na">replicas</span><span class="pi">:</span> <span class="m">3</span>
+  <span class="na">selector</span><span class="pi">:</span>
+    <span class="na">matchLabels</span><span class="pi">:</span>
+      <span class="na">app</span><span class="pi">:</span> <span class="s">rabbitmq</span>
+  <span class="na">template</span><span class="pi">:</span>
+    <span class="na">metadata</span><span class="pi">:</span>
+      <span class="na">labels</span><span class="pi">:</span>
+        <span class="na">app</span><span class="pi">:</span> <span class="s">rabbitmq</span>
+    <span class="na">spec</span><span class="pi">:</span>
+      <span class="na">serviceAccountName</span><span class="pi">:</span> <span class="s">rabbitmq</span>
+      <span class="na">terminationGracePeriodSeconds</span><span class="pi">:</span> <span class="m">10</span>
+      <span class="na">nodeSelector</span><span class="pi">:</span>
+        <span class="c1"># Use Linux nodes in a mixed OS kubernetes cluster.</span>
+        <span class="c1"># Learn more at https://kubernetes.io/docs/reference/kubernetes-api/labels-annotations-taints/#kubernetes-io-os</span>
+        <span class="s">kubernetes.io/os</span><span class="pi">:</span> <span class="s">linux</span>
+      <span class="na">initContainers</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">fix-readonly-config</span>
+          <span class="na">image</span><span class="pi">:</span> <span class="s">busybox:1.31.1</span>
+          <span class="na">command</span><span class="pi">:</span>
+            <span class="pi">-</span> <span class="s">sh</span>
+            <span class="pi">-</span> <span class="s">-c</span>
+            <span class="pi">-</span> <span class="s">cp /tmp/config/* /etc/rabbitmq;</span>
+          <span class="na">volumeMounts</span><span class="pi">:</span>
+            <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">rabbitmq-config</span>
+              <span class="na">mountPath</span><span class="pi">:</span> <span class="s">/etc/rabbitmq</span>
+            <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">tmp-dir</span>
+              <span class="na">mountPath</span><span class="pi">:</span> <span class="s">/tmp/config</span>
+      <span class="na">containers</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">rabbitmq</span>
+          <span class="na">image</span><span class="pi">:</span> <span class="s">rabbitmq:3.8.2</span>
+          <span class="c1"># Learn more about what ports various protocols use</span>
+          <span class="c1"># at https://www.rabbitmq.com/networking.html#ports</span>
+          <span class="na">ports</span><span class="pi">:</span>
+            <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">epmd</span>
+              <span class="na">protocol</span><span class="pi">:</span> <span class="s">TCP</span>
+              <span class="na">containerPort</span><span class="pi">:</span> <span class="m">4369</span>
+            <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">amqp</span>
+              <span class="na">protocol</span><span class="pi">:</span> <span class="s">TCP</span>
+              <span class="na">containerPort</span><span class="pi">:</span> <span class="m">5672</span>
+            <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">amqp-tls</span>
+              <span class="na">protocol</span><span class="pi">:</span> <span class="s">TCP</span>
+              <span class="na">containerPort</span><span class="pi">:</span> <span class="m">5671</span>
+            <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">http</span>
+              <span class="na">protocol</span><span class="pi">:</span> <span class="s">TCP</span>
+              <span class="na">containerPort</span><span class="pi">:</span> <span class="m">15672</span>
+          <span class="na">livenessProbe</span><span class="pi">:</span>
+            <span class="na">exec</span><span class="pi">:</span>
+              <span class="c1"># This is just an example. There is no "one true health check" but rather</span>
+              <span class="c1"># several rabbitmq-diagnostics commands that can be combined to form increasingly comprehensive</span>
+              <span class="c1"># and intrusive health checks.</span>
+              <span class="c1"># Learn more at https://www.rabbitmq.com/monitoring.html#health-checks.</span>
+              <span class="c1">#</span>
+              <span class="c1"># Stage 2 check:</span>
+              <span class="na">command</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">rabbitmq-diagnostics"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">status"</span><span class="pi">]</span>
+            <span class="na">initialDelaySeconds</span><span class="pi">:</span> <span class="m">60</span>
+            <span class="c1"># See https://www.rabbitmq.com/monitoring.html for monitoring frequency recommendations.</span>
+            <span class="na">periodSeconds</span><span class="pi">:</span> <span class="m">60</span>
+            <span class="na">timeoutSeconds</span><span class="pi">:</span> <span class="m">15</span>
+          <span class="na">readinessProbe</span><span class="pi">:</span>
+            <span class="na">exec</span><span class="pi">:</span>
+              <span class="c1"># This is just an example. There is no "one true health check" but rather</span>
+              <span class="c1"># several rabbitmq-diagnostics commands that can be combined to form increasingly comprehensive</span>
+              <span class="c1"># and intrusive health checks.</span>
+              <span class="c1"># Learn more at https://www.rabbitmq.com/monitoring.html#health-checks.</span>
+              <span class="c1">#</span>
+              <span class="c1"># Stage 2 check:</span>
+              <span class="na">command</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">rabbitmq-diagnostics"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">status"</span><span class="pi">]</span>
+              <span class="c1"># To use a stage 4 check:</span>
+              <span class="c1"># command: ["rabbitmq-diagnostics", "check_port_connectivity"]</span>
+            <span class="na">initialDelaySeconds</span><span class="pi">:</span> <span class="m">20</span>
+            <span class="na">periodSeconds</span><span class="pi">:</span> <span class="m">60</span>
+            <span class="na">timeoutSeconds</span><span class="pi">:</span> <span class="m">10</span>
+          <span class="na">env</span><span class="pi">:</span>
+            <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">POD_NAME</span>
+              <span class="na">valueFrom</span><span class="pi">:</span>
+                <span class="na">fieldRef</span><span class="pi">:</span>
+                  <span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+                  <span class="na">fieldPath</span><span class="pi">:</span> <span class="s">metadata.name</span>
+            <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">POD_NAMESPACE</span>
+              <span class="na">valueFrom</span><span class="pi">:</span>
+                <span class="na">fieldRef</span><span class="pi">:</span>
+                  <span class="na">fieldPath</span><span class="pi">:</span> <span class="s">metadata.namespace</span>
+            <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">RABBITMQ_NODENAME</span>
+              <span class="na">value</span><span class="pi">:</span> <span class="s">rabbit@$(POD_NAME).rabbitmq-internal.$(POD_NAMESPACE).svc.cluster.local</span>
+            <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">RABBITMQ_USE_LONGNAME</span>
+              <span class="na">value</span><span class="pi">:</span> <span class="s2">"</span><span class="s">true"</span>
+          <span class="na">envFrom</span><span class="pi">:</span>
+            <span class="pi">-</span> <span class="na">secretRef</span><span class="pi">:</span>
+                <span class="na">name</span><span class="pi">:</span> <span class="s">rabbitmq-secret</span>
+          <span class="na">volumeMounts</span><span class="pi">:</span>
+            <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">rabbitmq-config</span>
+              <span class="na">mountPath</span><span class="pi">:</span> <span class="s">/etc/rabbitmq</span>
+            <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">rabbitmq-data</span>
+              <span class="na">mountPath</span><span class="pi">:</span> <span class="s">/var/lib/rabbitmq</span>
+      <span class="na">volumes</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">rabbitmq-config</span>
+          <span class="na">emptyDir</span><span class="pi">:</span> <span class="pi">{}</span>
+        <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">tmp-dir</span>
+          <span class="na">configMap</span><span class="pi">:</span>
+            <span class="na">name</span><span class="pi">:</span> <span class="s">rabbitmq-config</span>
+  <span class="na">volumeClaimTemplates</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">metadata</span><span class="pi">:</span>
+        <span class="na">name</span><span class="pi">:</span> <span class="s">rabbitmq-data</span>
+        <span class="na">namespace</span><span class="pi">:</span> <span class="s">rabbitmq</span>
+        <span class="na">labels</span><span class="pi">:</span>
+          <span class="na">app</span><span class="pi">:</span> <span class="s">rabbitmq</span>
+      <span class="na">spec</span><span class="pi">:</span>
+        <span class="na">accessModes</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="s2">"</span><span class="s">ReadWriteOnce"</span>
+        <span class="na">resources</span><span class="pi">:</span>
+          <span class="na">requests</span><span class="pi">:</span>
+            <span class="na">storage</span><span class="pi">:</span> <span class="s">20Gi</span>
+</code></pre></div></div>
+
+<h1 id="é‡åˆ°çš„é—®é¢˜">é‡åˆ°çš„é—®é¢˜</h1>
+
+<h3 id="åªè¯»æ–‡ä»¶é”™è¯¯">åªè¯»æ–‡ä»¶é”™è¯¯</h3>
+
+<p>å› ä¸ºé…ç½®æ–‡ä»¶æ˜¯é€šè¿‡ configmap çš„æ–¹å¼æŒ‚è½½çš„ï¼Œåœ¨ k8s ä¸­ï¼Œè¿™ç§æŒ‚è½½æ–¹å¼æ˜¯åªè¯»çš„ï¼Œç›¸å…³è®¨è®ºåœ¨ Issue#62099 ï¼Œä¼šå¯¼è‡´ç±»ä¼¼ Read-only file system çš„æŠ¥é”™ï¼Œç›¸å…³è®¨è®ºè§ Issue#37 ï¼Œç›®å‰éœ€è¦é€šè¿‡ initContainers å¤åˆ¶æ–‡ä»¶ä½œä¸ºä¸­è½¬æ¥é¿å…åªè¯»æŠ¥é”™ã€‚</p>
+<h3 id="èŠ‚ç‚¹æ— æ³•äº’ç›¸å‘ç°åŠ å…¥">èŠ‚ç‚¹æ— æ³•äº’ç›¸å‘ç°åŠ å…¥</h3>
+
+<p>é€šè¿‡ rabbitmqctl cluster_status  çš„è¿”å›å‘ç° rabbitmq server å’Œ rabbitmq-peer-discovery-k8s ä½¿ç”¨çš„ nodename  ä¸ä¸€è‡´ï¼Œéœ€è¦æ·»åŠ é¢å¤–ç¯å¢ƒå˜é‡ RABBITMQ_NODENAME ä¸º rabbit@$(POD_NAME).rabbitmq-internal.$(POD_NAMESPACE).svc.cluster.local ï¼Œè®© rabbitmq  å¯åŠ¨çš„æ—¶å€™ä½¿ç”¨åŒä¸€ä¸ªèŠ‚ç‚¹åï¼ŒåŒæ—¶æ·»åŠ  RABBITMQ_USE_LONGNAME : true ã€‚</p>
+<h1 id="ha-é…ç½®">HA é…ç½®</h1>
+
+<p>ç›®å‰é›†ç¾¤ä¸­ 3 èŠ‚ç‚¹ï¼Œè®¾ç½® 2 ä¸ªé•œåƒé˜Ÿåˆ—ï¼ˆåŒ…å« master ï¼‰æ¥åšé«˜å¯ç”¨ã€‚</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rabbitmqctl <span class="nt">--erlang-cookie</span> <span class="k">${</span><span class="nv">RABBITMQ_ERLANG_COOKIE</span><span class="k">}</span> set_policy ha-exactly <span class="s2">"^.*"</span> <span class="s1">'{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}'</span>
+</code></pre></div></div>
+
+<h1 id="å‚è€ƒ">å‚è€ƒ</h1>
+
+<p>â€¢ https://github.com/rabbitmq/rabbitmq-peer-discovery-k8s</p>
+
+<p>â€¢ https://zupzup.org/k8s-rabbitmq-cluster</p>
+
+
+      <footer class="site-footer">
+        
+          <span class="site-footer-owner"><a href="https://github.com/zijin-m/Blog">Blog</a> is maintained by <a href="https://github.com/zijin-m">zijin-m</a>.</span>
+        
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a>.</span>
+      </footer>
+    </main>
+  
+
+</body></html>Ytext/htmlUUTF-8_@https://zijin-m.github.io/Blog/rabbitmq/k8s-cluster-install.htmlP£Õ_WebResourceResponseO%a/*! normalize.css v3.0.2 | MIT License | git.io/normalize */@import url("https://fonts.googleapis.com/css?family=Open+Sans:400,700&display=swap");html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}body{margin:0}article,aside,details,figcaption,figure,footer,header,hgroup,main,menu,nav,section,summary{display:block}audio,canvas,progress,video{display:inline-block;vertical-align:baseline}audio:not([controls]){display:none;height:0}[hidden],template{display:none}a{background-color:transparent}a:active,a:hover{outline:0}abbr[title]{border-bottom:1px dotted}b,strong{font-weight:bold}dfn{font-style:italic}h1{font-size:2em;margin:0.67em 0}mark{background:#ff0;color:#000}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sup{top:-0.5em}sub{bottom:-0.25em}img{border:0}svg:not(:root){overflow:hidden}figure{margin:1em 40px}hr{box-sizing:content-box;height:0}pre{overflow:auto}code,kbd,pre,samp{font-family:monospace, monospace;font-size:1em}button,input,optgroup,select,textarea{color:inherit;font:inherit;margin:0}button{overflow:visible}button,select{text-transform:none}button,html input[type="button"],input[type="reset"],input[type="submit"]{-webkit-appearance:button;cursor:pointer}button[disabled],html input[disabled]{cursor:default}button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}input{line-height:normal}input[type="checkbox"],input[type="radio"]{box-sizing:border-box;padding:0}input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-outer-spin-button{height:auto}input[type="search"]{-webkit-appearance:textfield;box-sizing:content-box}input[type="search"]::-webkit-search-cancel-button,input[type="search"]::-webkit-search-decoration{-webkit-appearance:none}fieldset{border:1px solid #c0c0c0;margin:0 2px;padding:0.35em 0.625em 0.75em}legend{border:0;padding:0}textarea{overflow:auto}optgroup{font-weight:bold}table{border-collapse:collapse;border-spacing:0}td,th{padding:0}.highlight table td{padding:5px}.highlight table pre{margin:0}.highlight .cm{color:#999988;font-style:italic}.highlight .cp{color:#999999;font-weight:bold}.highlight .c1{color:#999988;font-style:italic}.highlight .cs{color:#999999;font-weight:bold;font-style:italic}.highlight .c,.highlight .cd{color:#999988;font-style:italic}.highlight .err{color:#a61717;background-color:#e3d2d2}.highlight .gd{color:#000000;background-color:#ffdddd}.highlight .ge{color:#000000;font-style:italic}.highlight .gr{color:#aa0000}.highlight .gh{color:#999999}.highlight .gi{color:#000000;background-color:#ddffdd}.highlight .go{color:#888888}.highlight .gp{color:#555555}.highlight .gs{font-weight:bold}.highlight .gu{color:#aaaaaa}.highlight .gt{color:#aa0000}.highlight .kc{color:#000000;font-weight:bold}.highlight .kd{color:#000000;font-weight:bold}.highlight .kn{color:#000000;font-weight:bold}.highlight .kp{color:#000000;font-weight:bold}.highlight .kr{color:#000000;font-weight:bold}.highlight .kt{color:#445588;font-weight:bold}.highlight .k,.highlight .kv{color:#000000;font-weight:bold}.highlight .mf{color:#009999}.highlight .mh{color:#009999}.highlight .il{color:#009999}.highlight .mi{color:#009999}.highlight .mo{color:#009999}.highlight .m,.highlight .mb,.highlight .mx{color:#009999}.highlight .sb{color:#d14}.highlight .sc{color:#d14}.highlight .sd{color:#d14}.highlight .s2{color:#d14}.highlight .se{color:#d14}.highlight .sh{color:#d14}.highlight .si{color:#d14}.highlight .sx{color:#d14}.highlight .sr{color:#009926}.highlight .s1{color:#d14}.highlight .ss{color:#990073}.highlight .s{color:#d14}.highlight .na{color:#008080}.highlight .bp{color:#999999}.highlight .nb{color:#0086B3}.highlight .nc{color:#445588;font-weight:bold}.highlight .no{color:#008080}.highlight .nd{color:#3c5d5d;font-weight:bold}.highlight .ni{color:#800080}.highlight .ne{color:#990000;font-weight:bold}.highlight .nf{color:#990000;font-weight:bold}.highlight .nl{color:#990000;font-weight:bold}.highlight .nn{color:#555555}.highlight .nt{color:#000080}.highlight .vc{color:#008080}.highlight .vg{color:#008080}.highlight .vi{color:#008080}.highlight .nv{color:#008080}.highlight .ow{color:#000000;font-weight:bold}.highlight .o{color:#000000;font-weight:bold}.highlight .w{color:#bbbbbb}.highlight{background-color:#f8f8f8}*{box-sizing:border-box}body{padding:0;margin:0;font-family:"Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;font-size:16px;line-height:1.5;color:#606c71}#skip-to-content{height:1px;width:1px;position:absolute;overflow:hidden;top:-10px}#skip-to-content:focus{position:fixed;top:10px;left:10px;height:auto;width:auto;background:#e19447;outline:thick solid #e19447}a{color:#1e6bb8;text-decoration:none}a:hover{text-decoration:underline}.btn{display:inline-block;margin-bottom:1rem;color:rgba(255,255,255,0.7);background-color:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);border-style:solid;border-width:1px;border-radius:0.3rem;transition:color 0.2s, background-color 0.2s, border-color 0.2s}.btn:hover{color:rgba(255,255,255,0.8);text-decoration:none;background-color:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3)}.btn+.btn{margin-left:1rem}@media screen and (min-width: 64em){.btn{padding:0.75rem 1rem}}@media screen and (min-width: 42em) and (max-width: 64em){.btn{padding:0.6rem 0.9rem;font-size:0.9rem}}@media screen and (max-width: 42em){.btn{display:block;width:100%;padding:0.75rem;font-size:0.9rem}.btn+.btn{margin-top:1rem;margin-left:0}}.page-header{color:#fff;text-align:center;background-color:#159957;background-image:linear-gradient(120deg, #155799, #159957)}@media screen and (min-width: 64em){.page-header{padding:5rem 6rem}}@media screen and (min-width: 42em) and (max-width: 64em){.page-header{padding:3rem 4rem}}@media screen and (max-width: 42em){.page-header{padding:2rem 1rem}}.project-name{margin-top:0;margin-bottom:0.1rem}@media screen and (min-width: 64em){.project-name{font-size:3.25rem}}@media screen and (min-width: 42em) and (max-width: 64em){.project-name{font-size:2.25rem}}@media screen and (max-width: 42em){.project-name{font-size:1.75rem}}.project-tagline{margin-bottom:2rem;font-weight:normal;opacity:0.7}@media screen and (min-width: 64em){.project-tagline{font-size:1.25rem}}@media screen and (min-width: 42em) and (max-width: 64em){.project-tagline{font-size:1.15rem}}@media screen and (max-width: 42em){.project-tagline{font-size:1rem}}.main-content{word-wrap:break-word}.main-content :first-child{margin-top:0}@media screen and (min-width: 64em){.main-content{max-width:64rem;padding:2rem 6rem;margin:0 auto;font-size:1.1rem}}@media screen and (min-width: 42em) and (max-width: 64em){.main-content{padding:2rem 4rem;font-size:1.1rem}}@media screen and (max-width: 42em){.main-content{padding:2rem 1rem;font-size:1rem}}.main-content kbd{background-color:#fafbfc;border:1px solid #c6cbd1;border-bottom-color:#959da5;border-radius:3px;box-shadow:inset 0 -1px 0 #959da5;color:#444d56;display:inline-block;font-size:11px;line-height:10px;padding:3px 5px;vertical-align:middle}.main-content img{max-width:100%}.main-content h1,.main-content h2,.main-content h3,.main-content h4,.main-content h5,.main-content h6{margin-top:2rem;margin-bottom:1rem;font-weight:normal;color:#159957}.main-content p{margin-bottom:1em}.main-content code{padding:2px 4px;font-family:Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size:0.9rem;color:#567482;background-color:#f3f6fa;border-radius:0.3rem}.main-content pre{padding:0.8rem;margin-top:0;margin-bottom:1rem;font:1rem Consolas, "Liberation Mono", Menlo, Courier, monospace;color:#567482;word-wrap:normal;background-color:#f3f6fa;border:solid 1px #dce6f0;border-radius:0.3rem}.main-content pre>code{padding:0;margin:0;font-size:0.9rem;color:#567482;word-break:normal;white-space:pre;background:transparent;border:0}.main-content .highlight{margin-bottom:1rem}.main-content .highlight pre{margin-bottom:0;word-break:normal}.main-content .highlight pre,.main-content pre{padding:0.8rem;overflow:auto;font-size:0.9rem;line-height:1.45;border-radius:0.3rem;-webkit-overflow-scrolling:touch}.main-content pre code,.main-content pre tt{display:inline;max-width:initial;padding:0;margin:0;overflow:initial;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}.main-content pre code:before,.main-content pre code:after,.main-content pre tt:before,.main-content pre tt:after{content:normal}.main-content ul,.main-content ol{margin-top:0}.main-content blockquote{padding:0 1rem;margin-left:0;color:#819198;border-left:0.3rem solid #dce6f0}.main-content blockquote>:first-child{margin-top:0}.main-content blockquote>:last-child{margin-bottom:0}.main-content table{display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all;-webkit-overflow-scrolling:touch}.main-content table th{font-weight:bold}.main-content table th,.main-content table td{padding:0.5rem 1rem;border:1px solid #e9ebec}.main-content dl{padding:0}.main-content dl dt{padding:0;margin-top:1rem;font-size:1rem;font-weight:bold}.main-content dl dd{padding:0;margin-bottom:1rem}.main-content hr{height:2px;padding:0;margin:1rem 0;background-color:#eff0f1;border:0}.site-footer{padding-top:2rem;margin-top:2rem;border-top:solid 1px #eff0f1}@media screen and (min-width: 64em){.site-footer{font-size:1rem}}@media screen and (min-width: 42em) and (max-width: 64em){.site-footer{font-size:1rem}}@media screen and (max-width: 42em){.site-footer{font-size:0.9rem}}.site-footer-owner{display:block;font-weight:bold}.site-footer-credits{color:#819198}
+Xtext/cssUutf-8_^https://zijin-m.github.io/Blog/assets/css/style.css?v=ea0d461c2309f0dc38599e6b1a542daf54a4d5b4O÷bplist00Ô
+X$versionY$archiverT$topX$objects † _NSKeyedArchiverÑ	_WebResourceResponse€¯:'-.4567mnopqrstuvwxyz{|}~€‚ƒ„…†‡ˆ‰Š‹Œ‘’“”•–—˜™š›Ÿ U$nullİ !"#$%&___nsurlrequest_proto_prop_obj_6___nsurlrequest_proto_prop_obj_3R$2___nsurlrequest_proto_prop_obj_0R$3___nsurlrequest_proto_prop_obj_4V$class___nsurlrequest_proto_prop_obj_1R$4R$0___nsurlrequest_proto_prop_obj_5___nsurlrequest_proto_prop_obj_2R$1€8€€	€€9€€ €Ó()$+,WNS.base[NS.relative€ €€_^https://zijin-m.github.io/Blog/assets/css/style.css?v=ea0d461c2309f0dc38599e6b1a542daf54a4d5b4Ò/012Z$classnameX$classesUNSURL¢13XNSObject#AÄë=Ù”u` ÈÓ89:SlWNS.keysZNS.objects¯;<=>?@ABCDEFGHIJKLMNOPQR€	€
+€€€€€€€€€€€€€€€€€€€€€€ ¯TUVWXYZ[\]^_`abcdedgTijk€!€"€#€$€%€&€'€(€)€*€+€,€-€.€/€0€1€2€1€3€!€4€5€6€7]x-proxy-cache_Content-EncodingVServer]Cache-Control_Strict-Transport-Security]Accept-Ranges_permissions-policy_x-fastly-request-idWx-timer_Access-Control-Allow-Origin_x-github-request-id[x-served-by^Content-LengthSViaTVaryTDate\x-cache-hitsWExpiresSAgeX__hhaa__Wx-cache\Content-TypeTEtag]Last-ModifiedTMISSTgzipZGitHub.com[max-age=600_max-age=31556952Ubytes_interest-cohort=()_(954cce90bd05a9a4135c9486efbe0f6f686b6a5f_S1680228595.233643,VS0,VE254Q*_57DC:6442:44546:4DB9F:642640F3_cache-hkg17934-HKGT2581[1.1 varnish_Accept-Encoding_Fri, 31 Mar 2023 02:09:55 GMTQ0_Fri, 31 Mar 2023 02:19:55 GMT_
+
+YnBsaXN0MDDfEBcBAgMEBQYHCAkKCwwNDg8QERITFBUWFxgaHB4gIiQmKCosLjAyNDY4Ojw9PkBCXXgtcHJveHktY2FjaGVfEBBDb250ZW50LUVuY29kaW5nVlNlcnZlcl1DYWNoZS1Db250cm9sXxAZU3RyaWN0LVRyYW5zcG9ydC1TZWN1cml0eV1BY2NlcHQtUmFuZ2VzXxAScGVybWlzc2lvbnMtcG9saWN5XxATeC1mYXN0bHktcmVxdWVzdC1pZFd4LXRpbWVyXxAbQWNjZXNzLUNvbnRyb2wtQWxsb3ctT3JpZ2luXxATeC1naXRodWItcmVxdWVzdC1pZFt4LXNlcnZlZC1ieV5Db250ZW50LUxlbmd0aFNWaWFUVmFyeVREYXRlXHgtY2FjaGUtaGl0c1dFeHBpcmVzU0FnZVd4LWNhY2hlXENvbnRlbnQtVHlwZVRFdGFnXUxhc3QtTW9kaWZpZWShGVRNSVNToRtUZ3ppcKEdWkdpdEh1Yi5jb22hH1ttYXgtYWdlPTYwMKEhXxAQbWF4LWFnZT0zMTU1Njk1MqEjVWJ5dGVzoSVfEBJpbnRlcmVzdC1jb2hvcnQ9KCmhJ18QKDk1NGNjZTkwYmQwNWE5YTQxMzVjOTQ4NmVmYmUwZjZmNjg2YjZhNWahKV8QHFMxNjgwMjI4NTk1LjIzMzY0MyxWUzAsVkUyNTShK1EqoS1fEB41N0RDOjY0NDI6NDQ1NDY6NERCOUY6NjQyNjQwRjOhL18QEmNhY2hlLWhrZzE3OTM0LUhLR6ExVDI1ODGhM1sxLjEgdmFybmlzaKE1XxAPQWNjZXB0LUVuY29kaW5noTdfEB1GcmksIDMxIE1hciAyMDIzIDAyOjA5OjU1IEdNVKE5UTChO18QHUZyaSwgMzEgTWFyIDIwMjMgMDI6MTk6NTUgR01UoTmhGaE/XxAXdGV4dC9jc3M7IGNoYXJzZXQ9dXRmLTihQV8QEVcvIjYyMjAzOThlLTI1NjEioUNfEB1UaHUsIDAzIE1hciAyMDIyIDAzOjQ0OjE0IEdNVAAIADkARwBaAGEAbwCLAJkArgDEAMwA6gEAAQwBGwEfASQBKQE2AT4BQgFKAVcBXAFqAWwBcQFzAXgBegGFAYcBkwGVAagBqgGwAbIBxwHJAfQB9gIVAhcCGQIbAjwCPgJTAlUCWgJcAmgCagJ8An4CngKgAqICpALEAsYCyALKAuQC5gL6AvwAAAAAAAACAQAAAAAAAABEAAAAAAAAAAAAAAAAAAADHA==_text/css; charset=utf-8_W/"6220398e-2561"_Thu, 03 Mar 2022 03:44:14 GMTÒ/0œ_NSMutableDictionary£œ3\NSDictionaryXtext/cssÒ/0¡¢_NSHTTPURLResponse££¤3_NSHTTPURLResponse]NSURLResponse    $ ) 2 7 I L b d ¡ § Â ä	+.PWy|¡ÃÆÈÊÌÎĞÒÔÖ×ÙÛİßæîúüş afqz€ƒŒ•—™ ¨³ÎĞÒÔÖØÚÜŞàâäæèêìîğòôöøúüş!#%')+-/13579;=?ACEGIKYls«ÀÖŞü-16;HPT]erw…Šš¦¹¿Ôÿ AV[gy™›»
+Ë
+å
+ù48ENSgk             ¥              ÕOV/* cyrillic-ext */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTSKmu0SC55K5gw.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTSumu0SC55K5gw.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTSOmu0SC55K5gw.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTSymu0SC55K5gw.woff2) format('woff2');
+  unicode-range: U+0370-03FF;
+}
+/* hebrew */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTS2mu0SC55K5gw.woff2) format('woff2');
+  unicode-range: U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTSCmu0SC55K5gw.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTSGmu0SC55K5gw.woff2) format('woff2');
+  unicode-range: U+0100-02AF, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTS-mu0SC55I.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTSKmu0SC55K5gw.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTSumu0SC55K5gw.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTSOmu0SC55K5gw.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTSymu0SC55K5gw.woff2) format('woff2');
+  unicode-range: U+0370-03FF;
+}
+/* hebrew */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTS2mu0SC55K5gw.woff2) format('woff2');
+  unicode-range: U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTSCmu0SC55K5gw.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTSGmu0SC55K5gw.woff2) format('woff2');
+  unicode-range: U+0100-02AF, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTS-mu0SC55I.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+_Fhttps://fonts.googleapis.com/css?family=Open+Sans:400,700&display=swapOubplist00Ô
+X$versionY$archiverT$topX$objects † _NSKeyedArchiverÑ	_WebResourceResponse€¯#'-.4567UVWXYZ[\]^_`abcdefghijklpqU$nullİ !"#$%&___nsurlrequest_proto_prop_obj_6___nsurlrequest_proto_prop_obj_3R$2___nsurlrequest_proto_prop_obj_0R$3___nsurlrequest_proto_prop_obj_4V$class___nsurlrequest_proto_prop_obj_1R$4R$0___nsurlrequest_proto_prop_obj_5___nsurlrequest_proto_prop_obj_2R$1€!€€	€€"€€ €Ó()$+,WNS.base[NS.relative€ €€_Fhttps://fonts.googleapis.com/css?family=Open+Sans:400,700&display=swapÒ/012Z$classnameX$classesUNSURL¢13XNSObject#AÄë=Ù”…õ ÈÓ89:GTWNS.keysZNS.objects¬;<=>?@ABCDEF€	€
+€€€€€€€€€€¬HIJKLMIOPQRS€€€€€€€€€€€€€ \Content-Type_Access-Control-Allow-Origin_Content-Encoding_X-XSS-ProtectionWExpires_Cross-Origin-Resource-Policy_Timing-Allow-Origin]Cache-ControlTDateX__hhaa___X-Content-Type-Options_X-Frame-Options_text/css; charset=utf-8Q*TgzipQ0_Fri, 31 Mar 2023 02:09:55 GMT\cross-origin_private, max-age=86400_Fri, 31 Mar 2023 02:09:55 GMT_°
+
+YnBsaXN0MDDbAQIDBAUGBwgJCgsMDhASFBUXGRsdH11DYWNoZS1Db250cm9sXENvbnRlbnQtVHlwZV8QG0FjY2Vzcy1Db250cm9sLUFsbG93LU9yaWdpbl8QFlgtQ29udGVudC1UeXBlLU9wdGlvbnNfEBNUaW1pbmctQWxsb3ctT3JpZ2luVERhdGVfEA9YLUZyYW1lLU9wdGlvbnNfEBBDb250ZW50LUVuY29kaW5nXxAQWC1YU1MtUHJvdGVjdGlvbldFeHBpcmVzXxAcQ3Jvc3MtT3JpZ2luLVJlc291cmNlLVBvbGljeaENXxAWcHJpdmF0ZSwgbWF4LWFnZT04NjQwMKEPXxAXdGV4dC9jc3M7IGNoYXJzZXQ9dXRmLTihEVEqoRNXbm9zbmlmZqERoRZfEB1GcmksIDMxIE1hciAyMDIzIDAyOjA5OjU1IEdNVKEYWlNBTUVPUklHSU6hGlRnemlwoRxRMKEeXxAdRnJpLCAzMSBNYXIgMjAyMyAwMjowOTo1NSBHTVShIFxjcm9zcy1vcmlnaW4ACAAfAC0AOgBYAHEAhwCMAJ4AsQDEAMwA6wDtAQYBCAEiASQBJgEoATABMgE0AVQBVgFhAWMBaAFqAWwBbgGOAZAAAAAAAAACAQAAAAAAAAAhAAAAAAAAAAAAAAAAAAABnQ==WnosniffZSAMEORIGINÒ/0mn_NSMutableDictionary£mo3\NSDictionaryXtext/cssÒ/0rs_NSHTTPURLResponse£tu3_NSHTTPURLResponse]NSURLResponse    $ ) 2 7 I L b d Š  « Í ï ò9@behŠ¬¯±³µ·¹»½¿ÀÂÄÆÈÏ×ãåçé27BKQT]fhjqy„‘“•—™›Ÿ¡£¥§©¶¸º¼¾ÀÂÄÆÈÊÌÎĞİû!)H^lqz“¥¿ÁÆÈèõ.âêõú!*/CG[             v              iÔO™ÌwOF2     ™Ì     ÿ|  ™]                       b „P?HVARˆx`?STAT$' ‚/V
+‹Xòu„ 0‚Ç6$ˆ8 ‡~ °ïl›V³Û0ãYİ8õÒ	7F6Ûlî3!l "±ã“ÿOINÆìÁœ©–ı‡ÈB\¨F¶«!“:£Ó†V›QyÅ}Ö3²W„¤H"=°UÈåÂ$•š(%<ÂF¯h$ÜdÆ6…Ñi	±oê¢ö`ˆ½X®‚½§ıòbñĞáK´y5ò¯ÚŸIL¼¢ÿ.ê<­¼Àq^*f½H"M(“lğ‘êáin÷înDNÜFZÜ(%‡XD‰E• Ú¿ù`ñ#£ñ©Ña2"Wìnx~›½‚Å2œÛ-ó¼¨ïe%ŸD•T+´€’f.ÚZ6ÇC´Öç«êØ"uÂXÛõÉ
+
+EÂœM”‹1ñÿáZş™$›=bwU„Â¡­Ñg+ä’·•†ò†pÎÿ«¥±¦1k’F«
+(:5öÄm%ßUy¢Sg0£Á6»…±Í•µpÖD0’¥¤%RPÄH¬F]¤Š‘Ó©K{•nÿn.ÿ{µı÷>ùùD| 7ëãÒ	­CM°¢‚iBo3ítÙ=ıËÅnîx÷ï?×¾# C„3ã*äK…V¾ëŸ¨»´D9¢ß—~ú.ãÿ»Ú&ÙL²³À—õuuö~o!ËhÆİş¿o³ïŞêêj§é¤ƒ¨Ò4ğDüÏÎ¿¯TÁ˜316KD„d&OLÙ·"Îû?R3K±^b.÷¸B(¯bÉÙwİµDİUKD	Û±l‰G£şÃã¦ÿj¬2³îŠûöÕŒæş+®oæíJ‹xA’ JªÂœÖÍºIG{! M† ¢®…jÙÉóôèËë%Càé')Ğ4tØy2]®¶µÄ½-émE¤$ÃÒÃ1ÖbÃEn¢~­‘:¡MÀ_àÿJµ¼V	ı¡‡²Î†Ú\ÜX’Z’ÃUÁpápñÉÇFƒH©jæ5@qÔ„¨Ù&µÔ@r^íˆa‚¨ÍAI;ùÖEPzn’ÚgHÚ@mL'‡7ßı|öÙw}½„ÿoZ³Éµ¢¨‹Æ8Œ™ü?“iÉnÈ^Kr¹Zs­o}´R5jÕŠBZ¬ÃºšÎÎÛ¡®‹‡J°,|‚îu}Ú(;.À ×;1´xøvò‡ ëa Ò]AQšBèmkeU·³Ä¸'í:|’øş}õå&”êE‡<4i³}}Œ?í3çA–STG_Ö/r)a<ÄAt›íÚã,ÃéÙ`ruj”h—_YóyÔêO™$cîü'BÁZ”
+½9¦€¥-u Ø&°@‰1–%+V¦,v
+;v,ö¥pìlå„)Àô‹Â·  Gğõ0¨ú04°İÅ.á	½¡AS<…àĞ˜)MÃªÑT1N–§êXyá¬Ş×7Éõ`·”Å»•ÈË¿ÆÛå»Mü©ôfw¸øuV†[·«”òøòv’PÇ÷wè5düz'_ÂßwÃğUøÉÃ]Ğ~ãÕÇ Âa(,²FOa%}'Ê—œU½pè¸~JérŒ.…Ò‹Æ•d°_íÃğGr)Ó³±ß[/}j<ıHïÛ¶¬ ¬-“Sè4ı¼ú©äšZ‘Ë"™L‘;@¤E•;ĞË r¦0åe¢‘‹‹6©†á£|V İ½tG2rˆGlåñÁ"Éx“{å86C›ùhÈRz¼­3QñNÅÂMV*©!BbnªÏ)µ¦ƒ¯ƒú¥ÒÒQ(s´Ç×Ò¬o¹“-™9O¡—¢×!·ŠäØäÑù:äC^>Õë™îÍó±¾û«YâC§¸Q²˜èøñeÀ€¿ı,ïœ¦ 6¤Yí¼y«ì¶ÛÎÛ˜èû;D™S›ûº?ğv{$.z·+Y‹ÌZ%®;p×cK¡¼6‚|6ğq¯<å¯düdğ{»;ø$ämùWû/(¾²^ê|øÁ_É+¿†oÜükÙ#¿õh»çïØŞñ_Ûÿòõ?NşàÓË'R²_÷gûw¾p~pôù[&ş¹uÿ_Ô3Ò¼t!r„ß@<g¢Ó}‚?K~)sà|í>ÿû'ŒoPÿø\jù“ÌÿüåÔŠ_‡üßh¼êÒ§r*>Uuî3u
+½Ôé—ŸÍúè³‚¡Ïæ9óÎ/_È;ù%Ó_NhüvküÁ÷¡S?Öªúñ¢êß¤]úKk€k ÈWãò Šl¸V¡»”²‡pÒ>Œ9Â§“ìù0u¼˜4ğK¥½{yOqğ5ZÂ{-.Ç^#ƒPœ‚½ÑP\ßKáAmIÁpÆÈg m’ñ[qù‚_Åw¸‚Ï]û–"úÁü>ŒôWªyäÚWà”ö0ß¨ºåÚ»®öx†ò`Rµf+Œbbrê„‡<‚jãc>lĞˆÎbj<ˆN/µ›5lJW(¹FH^¥Æ§!}%X³9ÿ{~°\!Û,zÉ=Nl˜zÌĞJGr$Uè9(—5 ÏĞ#ãf÷´qD‚ÂÊe¼Óâ5gH†I+"1ÜnÁ< ;E0PlzìõL¬V°†ŒI@v&.ñ1òôğ‹yi¶;”‚ö5ú‘	Ïñef›Ş(Ãte&û`Ú‡‚ÿĞ‡DH•ˆ™ØîU¢ZJH¶{¡­’|8cçX,IBvdçñF€:
+cOp2±Õ'Ê9Eäù‰}>~wœN¸~õ–=1éµ	-t>9UpÓÏ:[AÓ§ëq¦k×øƒ€SÒ9é’WdíšG!´©+şÿ{íûúÈÏK­ÆOûa
+äõ­!ätÀ=oÖ-kˆßó–å®&—ÿ÷¼$€ÃŠO¢$H{µ¼9Ç±ïU’eätƒn—™'õ¾ñ¡ãfqßU×ºû¦ŞyPP:>'¿ÏíÃ^M'ODp3û^?SK#à>†ÒæÎ³äÙäPÇø9Ûë^Õ×Pœ(EŠÍÍ0×¨ÆÄ‰òN4:)“6¹~ó€=&òıî¢vTC4ÔÏªb€iÿœRØ_¼~ÿ»‚âØÆk£š¢›tƒ>]9Q9^9R9Xù¬òaåÊŸıĞåÕ3_g© {üÒ°f!wÄ»ÇQ­Ä’3¨ŒƒãDÃ$<,s8–Ã³ŞÛÆrDHµåÈm<GËQ>MU“›pä1=^ã£‚rĞñ¾š§Â“}OËÕ±ˆÀÂâ0îz‹’å÷! È<W S8å˜š pwÌB‹Áq’Ö„>›,"ƒZ	z÷nıÂÂØŠ8kl:ûòø5h³9•áì³5°4}±ggğˆ60'Ï³¬óñ¼u¾^ 0Ä*&ƒ½–{E­)x±ñE8_ä0Í¦yÂ¼9èã¿Ei¤j*«9QÏ¾Ûœ¡ZurI×ØÌ{Æ_À1@ÇÒ±qW»±w-€56°m×s¯t¬}èuíÀqµÆº.—ËÒ>™lš#	Á[j6Qö:ntLLò {ISdã@$W_wÆUÙ«dd½²Ê±A²E„@ø´"$MBßˆ1É‰u³ñYän©Ÿke’•;ƒˆ-¹‹~£ì ©%“¢sÛë$ÍSÖÃnäƒS¼·Ò=T–òš…	?Çrtˆ\óXvØı¯láb\~.0ùrû}_ì~ìµ8ƒöÆÎÎqÆì_iùO÷!şZúÜÎ7$úìç2º¸A½<â=õÊäóúôŒè]âğññ°	ßÇËN‡’ıã/9DÃ“°Æq2j«%ãÀ5l]™\ş_YDOwÖÎ§$/é&|AÆ‡J†}ï›(ø·÷gx‹A½”ÏyéÑÆ¹°É‹c8“®ø÷×÷HZß”Ú;$‘31Ë¡ÇE€?lë3oÏpà¬RãòBŸƒ×P¹|hÜ…ó6ñ AAú¡6)j¢^hHò®Ä­¤ZövL«[c£´É-ÊnT½·‹¨:¨ÇhíòJ§¹8âÑú
+ÏQ3¿ÿ˜º5^»h³ûÕÃ‘TÎ?>tŸ]Ë	ıJf¬”åÖ*²32r½hB³ÌV<PJÁn.BÕÆ“mx,}Ì£^üï£.¥şNÑ·umâ¿7+ ‘î¼ ¿O%´ƒ*ùºı]úcçüÔTíy[Í˜0}ªğNxŞâ}İÊpÊ/ı¬Ÿ7áŸÎQõNùƒšœqMmQà4(ğoM¯[­7£¸íLÀ²×(ü¦·“¯å‹ÔóótËb~~ÍVoî&w…\äîÓ¹ãî#jxÜ,Ì‹„]ˆj	ÃLñ±öéEOĞaU\S#şY¼×¬Ë¶tÏ¬]ğúÛoçph¯°6wH©àãÚ}!vê Ø,}PKû$bög¾ŒVN#÷öX•†^•­j†Bò·Íf=)~ƒ¾'ˆ=/íûÆAg~m<,ö9úñì§
+ôB¬—8]ËêT–w—±Ìƒ__°†­[MÈIæVs‘šeØæf R²Y>orK_7ÛEø„É/ç:Õã+ß¹®ÙI İvÆÁÙ¨Î™²Î8
+ØÀº/„®ÖË£ëqgî×=ş¢k¡g‚~‚ï‹Ï×,[']Éã­5©öQ,t@í_'ØÛj=ñ€¬7TÁ	—1§2ìvæaıÉ{.ó¯E–Â×róÓ0–	m-·7ĞT°ğ™Ğ»ßF±¸Ã^å;Tk¨wv_ŸáøËÿ¼Íc/Ö¥&‚Ç)Áãse¬/¿ªŠ…LWX‡ÔBEñöÀô•=E\—hj¢‰Ëååß°ÃJV¤;ïqHk=ÍfZéªñ¸AB·wëäö<¢³ÜR98Åq`)¸7‘|m8A¥¥(@¹3Aª§]Q¤œr*.,%ôœ1Ëùà$²d¼÷ù\_ì‹çoÑsÉ“g¥’iÿ"ìã!bvö†/1èT<.Ÿ„µn]u³Eb…ùz™o³@kÜXı¾!i9ŒÑğ·Î]¹ÊSÕQŠ–Û’›ì©r)àA©“oe4wÃ’…íWm3æaıÑ,ÿ«ÔP¸@_I0¹!9´&Á„{IÚ{Ê0¸
+RªÑÊ_úÒ’	K‰Ö]À?.Œ"ƒå_†ü;6'ÑŸg1¥ığs‹½ğãÏÄ‰n<$ù†ÚJ”‰0&/M$—ƒQ©ÀqÕr7´âã«É@âqş•;´C^õkB}.ßÎÓßy;ü´­]û0û#4–·Áƒ8®Rãì)ƒOiéGWÉÔÅ@;Şÿª¥ÈUñ]7XDÓY8Ÿ<_«Ü&ß^µzÃè	Úp\I—%;¥šşşøB-3Z`D1›>/¸EEÉw\/ì™Œÿí­Êré”QZ¡ñ~‰?ÅôÒû[ÁoÊ×øÎ@76'çÔ“CQÎ«>Wù™ uò JFT"á÷»ÿÀøå¬éQÆxzöô7rÖñ4^Ì“ÙğùóV%ëwMJåN6|ÊßÍ-—*x•ÂÙ^,²Ó[©BÓ¸E«à¡¬S=‰Ôw—UµëHC¼V»€;¾÷\àšÅMGaıĞ¿«Ş¡
+"í,o-W× ª»ô˜VaœŠ ‘µ/"•ı^IxÏ›q¤°š uˆá,GÎ«Û³ÈœZ¸óª¼A•+ ^QdÊC‘Pu~—`õé^yÔ!¯†Õi>5z4ôŞâskg¯êÒv‹ÆÉ'ï…(êcÜ¢iúc©îøõ·vf Ï†¨„Y*¬;ıd/ÎbT¿üX–_q gè¤¢‡–hqtŞÓMFë¦æ{%èñ²´}TKı–'*\ øAŸŞp¦.Tb–´8Zı‡›ÿ“à/İ-;ÛìbuŸëô1?+ÄA¸ó_ ­yøÉí´#¬¤W,!Ş$ŞQ´İ2ú¿>„qáÙ.2([ªËzZIãX¤uF@$ÉsRÖRğÃZ2ÄB+…ÍJ°< #ü!é«¾ôâÁ-•.úÄªÀ7ñ=…0tû-M•Løâ¹é¹®³
+¯ïè©I¶4Ş)¢Ü$ºãy¸ôOº£Wg¬^ïÉ³"×İ{ı§ø­ÑI}‡C¼•«
+o+bª(&yó[\ı’³âx8nÆ2ß/	ÀîwQ¨cÙ½{"×šÒ¢èaç"…HâqcN=§ÿ6«C•8Ùøü$¿ƒŞ9ZÇSÕ+‰¾s{X¾RïwıÿÜŸí¾~át
+§bè4* Àõ™Y×İiâİ‡Å/P€§TùveHÁDÍ©öçNèÃ'LËlÉ|[­7o¦‚èş¬Ù¦İ°$ğ'ñıÁIuWî¦‡.ŠCg©Ÿú¦mºP•
+ëâ“ãZ'¸ù&cE#é›'ÜXˆzÊÁ®¦3zèyQLEJûÓ©EË¡¬¢Iá>!iÈè}…jX[“\àLÖ+<1 Üúp§ëèÏŸ~=Æëùõùó¶»Ô\öàĞ{„+àr†­ñğ™Ùvï¦#Çìô™‘ßıë³ç­?vkè ÖGŞ^ôÃ=Åq– !¡rpº‚i¨SÒ÷Å:V%¾dó!oÏOşİşú”Ÿªñ^Lö¹Šô°î–üôçütD+1ºÉÈŞÔ±#Ì9K„ÉÏ?Ñ¨«"Ûnõ¤I*å–±ÃJ¨Ùå¢ˆT¹RÜ ®ß1XïœTxªõjÛƒßÃåÒ²IıA"œ…ÿFÄéì’Õ'd¥åÎÄ€Ó½$l¹K\é©ä"‘ fg­]ësŒB£ŸOèOÿ¨Úër¡ÀmÅöëÚãƒuƒêÿ7×Å×÷nè'%Ö°I§Ñm!w£óçN`x”NÁø#h:F@øS@g˜=l2ÛwØf§^N¡ö©–æ+zŸœKåüøNÊY;?Şÿt*…ãÿğû»xv}uNN½°ûŞ-<«®V¥ª«ÅíX(´™.şI’mÔGf7øÕ—ù†êFEfçH˜1±¤½² íLˆ€$V¶Ö²{FÕ¬Ä¦äÅ\ï_ÎRàqfßÂy<»¥&:f¯ù˜Íøt{™zå}ÎBŞ*$Öãx´×Sø¾›çNÖËâó.T¶7whúi‘¥"eGAYx™£ÇÏ‰ÀÕşæõ@_âoğÏòW=«^=İĞ¾BÃb$Ğ`sØzqår)pA”6êº*Ö+Î]ùÃN2< R•Fº¤5«}êäá‚Õ?ü ôØ§=LÈ‘fèdë ÿˆÖ»{?“œòN1?P*İáwçÉ™XkÓÑoeœZß˜òù”ÔkMİÊûê–Œi®îóçIqmïØdkÛ@Gb«%‘¡5ªB8ìªw°ïyPîJ Zı²•ˆ¬£9Q¡ºŠøph¬GW†¨-±X=õTÖzl]’=^œ$ìlÊàC°‚$zmŒ2ûè*Ç›}¢õtO«šÉÎjI]p1®åJ¾ÕJ•ÚÊHÕ²ÂÙù¡”4Vz§ù!zÈ?âgİ½_HNyfnw¯
+MØåw÷ééXk“Q‹×qœ:?IÙ•”Ôkİ¹/hšÓ\İYÆO?ˆô}cmMÉ\–¼Œç’[H‡Ò+ŒîÇ Òğ«ÆƒäŸìİ‚6ŒRëpØäá±m!f?sFP”
+%S­¿á’Ã²â½èô{›ã…3D\ÍpæÌ‘‡’õ~¿°‘Wu.%ß¼ÃÀÑ€äØç²Èè0bt4,†”ªÏ*J8âO?¤çz, ÔKkó±ØÊLGBÓÄçIo:	ƒôuQ$éıµÜç2ó¢ÖJaTlfÆv&Õ5²=9ãøàıÑêôûËj}Ô€ı^«ö­¶tE8M‰NõT,Ù¹«irbWæ›2«»­öû;o½EÅ8WŠ Ï|Nÿ"<?ÃÿqIMyó±òÖ§¬É+t’s²>­Xš§3kŞ±õ&ÏÂû`©<èˆ~Àšz0êríÊı•®äá»Üƒ\;Q}-Ç†ª»,ô³'-­z¯	‰ÕÅ¢è=Ûe¬~‹²¦äâçÒãlï¥ì_h×jÇ3şÍqñ[9ÓSÉgäŸ%Ô„U¸È«>ò²áBî®/:FãG¸û;#ì'¾ö¸ÕÉıÊ(±œº±5ëå=Ïh7JÍÑèÂ–ßşqíIñ·&`2{ñ5éì8aêçk•ÿ{îCG·ÏZwğwprÖ§K÷LÖ)³×Üá÷Şøûc± Ñşñÿ£ıÕõ_Öá|óù—wéÇ¢ç^‰nÄÎáeÿ´é”çòwıeÈ&4ÙZî"îçÆr‡•@©³7‰l/‡³w´ıÅÜîéë‰N‹&ã#´Ì™ºèi£|Õº«şX¶ï‹}(×”cHÃOnĞ
+ÇXÚáÃÀv˜Ùeˆå#õŒã'?Õş{h~ÑÌzßâßí’¶Tšä9™;
+- ÿghugÏ]s¹md2øßIWü¾iÆÃÊ·v#Nƒ˜å—CBëÁëeöÿ›a¼Á³zÓÁõºüù3·Û=Æâ——Òv?ï^ïHÙ}Éî{‚axo[º€$ÍÚm}q?g¬)}Á8=<ç6™­«‚S—°±ÕÙí›‡ÿì¼ÜeñV‹·(õ7‹•;Ïì²ZWÔìùwbÕLSÿh,ô@këõ$¹_¼¨?[ÊÛ?õ;=ØÖl˜*Ä½úÊòÙ¯e'ø»‹­¿ìe9|Š,ÎêÆ„g…³I‰=¼*‰SS¸,Á¯J˜¯6>×å_÷Œ† ÛÂ&=¥Òò J-Œ˜ÔïQî3Ûê:€‰SK©ë6àöÏN+ùÅğQb÷AÉïãéK«·V«‡ãxãªó T8ëôtv¤›²IXa:¥Ÿ8q Ş9eCYy}şAK—õ[¶;¬BoûØíaÛ
+ïìıéÓ‘ı´Ùs»¦W­Å{ø;#vÒwx"Û¨»{
+&öº´¿Úo¹+<:Î*ã`şGÖt'è™®¯j­šùê¯ÿ/_UĞ³èçW. ÜºîÅœƒª=ìëPUs	Ğş8±yòÏü½zêIwP¥\¦_«u'¿qÎf»ÎögÀ!øÅ÷ó\_ùïòë b§:g¿vÜÿ-ÿ[ÈEÔ×½ÕÎZzvxºÉş|œ ‚/¦p¼¬¶3zõêÄÒ·…gÌ78•n²Ä£4qSfß–‰mfWÌ(Ÿæ(#ùÓœáZ¦ë*o4½kö[¾Bš%m¿xæ,°‰´ÖSLµ¼m^!CIºûï­¤‹ÊÿT•Æ8/ÚNçóÀÔúEÓ Á]jÙö îùì‘×Ÿt=IVoµ=Èëşı¶ĞÀëq2÷ÿÈªÒ1(·KÎºÚ g\nÏ5@j;3ªíÁºÕÃ_-E»?œş!ªğı™A gØÍ©õ{û™½‘FTúê&Ûn\sè¬=w¤ûİÛ]ÀU i¼QœöÊò,^¼5”zÊUiçAÎ:+O¾+¯økÆ§Ş¼ŞĞZ£?1¶ëÈ1pW]ß[o¼¾ÌY
+©çãf§Úh=*
+,½dÑEUœ½à‡'Ö¿=İ–RÙ¦Ú×‹‹@âÈÑTwáát£R-7^éìûÄ¨‚Œ[ûû`Ù”¾—‹Ë>šíp…§SsrizŞĞ:[²<Y; N!cÉ*[Á<+ÓE‰2Hv$di4Uqa‘&·¨´(»Xl"­¹!Åiáz7¶n’/h¼İ·PWRSQÔ*!LWâÀÔº)`0ŒÁ÷¾@t¿»§¨ß!Âv]¬ùöo‡	>;ñ¯_/%7W±Áò@'ïºµ››I®¥3*i>£jåÂÚºêf¥©®°©ì|d@™Ç[\(ÌÌ]yt¿ïº>W—sªen:©ÿz<?–Y…™¬ Õûn3Oˆ(†ÑµƒWé6TÒe	ğL”¬Ü˜_“zb¶ãŞ*ûÿØæ®w¶ÍĞ÷ikUm—BÕY³¡º6ÆZÍùÂŸëNt½Ñ—ü+3¦u´¥¶4Un{mIWE›oKÉ9ùxB$÷~3W.+ÿk®¨UyÇ†ı`!¥d:. Sø‡6gÌ‰áéüğ¹õ¢àñMUN¸…ÆMrM&yµ|¹ëøöİ'0$)p‡wØPRõ­ß,å‹ÊÿZ*ëªú“}˜æû¿ÖSøkY^C$qbS¥Ë“–çÓGïnİ2¼ÖçÓë#F’™½Rï_/`Ôï½ef•œXŠ[$¯´ÔæåÕ€Ë›#d§‹(ysYL„7œª!¦ASa=á¼œ˜†7s	£P–ZG9tÆQ±Éˆ@’6(šìjàprÁ•»pçPÅİä½ş¢&œ ­¢ş8÷8‘ôCâGE%IŸ"MƒQ»ïÈ¶ı™aÕĞĞÊ	¾x¢şşàr]quYQkLğT%	œme\ı¹k1ÑÛfvİgKş¹ÚĞšÈ“›—µ7m#-?ÒÍÆ,Cl8ëwŠ.[~Á=!ùÇêAëdš¹˜Eã…Û„Ÿ½U4½\øÓ¡ƒûâhæşÂ„Cšÿ¾{{Èò=L¯.²wêwì¿RdÛâ7ŸGÎ_ Â˜ú¥8Ä%Ù.¶ØìâG{ÁEÓöO¾uİ—hhá$û†lïÒ¾>ìíCŠÒb ¥c–k‡Qù}±«U¨\Mƒ©«¤Mğtd&Œ[Ï™P´0™‘Ğ8EÓÔ27¥:©Ş©iÚL+%/E›† ¢©0 ×m>æ&€L©gnJqP}ÓÒµ
+K‹,~ª6Õ†¦¸±@ísà\VÚ¨ğc #³`Üzn-¤¤'4£÷6º£|¿oP)ÅÅ`]„bòŠ\²ŞX-Åªã·Â@.ÿ øŠU¹ùGÕÎWt*F)ÕÔ&ş£3¹Óº¹Ñê[Ÿ¨sTuËXó-ÍÌíÑYâçgméjÇˆM7Êï–ì)‘{~.áÇ™ò¢½cÀãË[Ê	š3V·Ó‡_¨-kv<]vú• –E$÷÷€¦·b)HMÌ›e7üËÇæ$`öı`õÚÆ˜¨:ıf”LTA-ëõ1QÕ»=ŠIDhQW%®×ÿ’%’¡Ÿ×UG‹kê÷¸©Ë‚Ã%%ŒĞp-“YÎÔjYaa%,†„|Qğpâ e‹y±Ï8¶»ûìn\)nW¼õ ²åœ½m¿6T„¿,ÍWÜ÷'iÉl¨0KXt¿i1ç”e/£Ú5Bã´‚;¾ (’1DrT‚T©ş1ÂQp¾:ú(gĞåckF-ÛG<¦!x\ÍÃ)`©Ğn>Wİœ
+Š(§¦Áx8”€á71K\_ËdÀ*)‡ÂÂàşDÔ¯Ìw…ÆÂı9PW?°A´îµTŞ¾•ey¶Wiyû–eîÙ{²ïİVí={ö£7p…ëí;vèãî^ÈÓ‘+Ñªòƒ¾e“GO—ÔÁs ‹LR,“ôßÈ&Æ¾oª–~;2ı.±±ñlt\J,öİèÔÛ	°Õß¨¬ÊÔ,ÇØF¦ç†¥ğ(
+•Óâ¯Ø¢D|ƒh:ùĞ§IANk©ò-ÅHÔfê!*MÏáü5Å!.£j*¿«é ¸'bGØÉ£Š» ™b»»º]vZ“Şc•:y|öŸêú¾û	õ‰Ï•|)—&¢H2Í©—ûtIZHgÄdk‹2°Kˆ‰k	ã4JbÃ[Âãe­áÜÆXIÁ[Ã$9ñr…X’¨%éŸ—D§ )5+5>·kÕÿÌ…!¤Ôï¿æFˆ’œ¸¾ä0:ŸìÃ ‹Ï5`#+;Ê³©9éªPÆPïQ`°ÖÒ¦ˆÓ›F±¥i|ÍpÇ»òÀ½BŠcA‘ÉUSštMj—B‰Yññ‹x v¶ÆQ9|± §Üÿ’­T$ƒQs {›Mbh‰7² ¥5‡!tXìa¦È_Wõeµ%MÜT	ĞmÍ…LÇÖù/‚lÚ7aæ®åsq‰ëç¯fn\‹Õ{€WÏmê-i«gØHtº?Ï\\£D)pÜ}iÀÁv)³& âàuˆ´¬%Ån¿ <Ÿ(ûFç:Æ§†ŒCSòFNØYS’œ,)),ˆ)LNŠÕ L»¥¸[Eµ—ÛËTqwëAawŞv¥90x5Ûğaöæ±û2çêïCîµÇwRå¹å÷z;xÁ™¢A\¬<ÜÉpKzíŞL; ó2á9²#õŠ{LƒPgA'’¶"‰Ï4b…÷Bç¤k@â@ï_ÎŞ
+­:x¯âT˜ H††jÌğÍôÈ¥ˆ^6¢¤Ím¥ñ|QÚc3%[v¯éD,c¤Œv¶¹‰ÆAFØ«ÚÜXL44ZUØ§;ß{¥q³Lœm•Ü‡ˆAé(â;fyøïÃ¿FLz|˜èâ=ó¼èiÏcû?š›S7›ÙWä³ã„ïş¸ö¤Ğø¾´î˜áXO[ë·fE—òşøÏ×Åv­êÌjWlœ\'—Æ%È$²ø¸©-^–Ğ]P½ gÂ“ZTìÌcÑ	QSMŒ"ã"œå-¯ÏOëÈã'­gªÑëaVç5m^1¨æBøªK•ˆÇˆp÷ÏÇ…u0!¾iNWí’ú«K_1z'IÄ?İ¿xO:¹ño	¸˜jeÇlã@ê{”$‚ˆnÂqL¿ß4y šŸÛ6HÏ‘·–uS%®iûò’ã(H˜€E÷æ¡ä"wq 	-æSxÁèğ@q+WVæÁN0Ô©ún1+*Èé:†”èç‹“^‚¶Ç¯miê_>xÄ•içB;'Å(H‡…y1²2º1‰ÇiQM™™Y]¯xÆ­ÍB>Öf+¸Çıh‡Z&ô:r_E_4=–|ÜtÑì»|…TİÑ¢¸qèHÛàöÓ{êTrÚâPÁ<ú®6$éZ*nş&Ü®^³åmÕ©ö7í«#ùŸ¨ÛØ…¥¨?+«jï‰9ÛĞS¾ÒÉÍß§«:øô3ù©ôSíâÜ‘3®¤Y‘%ş ØT»Rû¶Õg¯Xóq^#á×=ïw6È	Ñ* ;¿^ôñyõ‰ˆjˆNT `ÅUáXä»•»vÁ&Ãë`ùµ’Ñ¿j,ƒr)*ãí¯^+cÉì1#'ßnDĞ·¯•{ÄÙÕ—î€8ì²ò¿¦Š:q•wlèGÆ^ŒŠ„˜İ f:¹•ÙÏN•_ô½ß¬¿bı¤óññÑöÕMu¦WÓ)Õ‰ä%à/¼ƒLÙvÛºZòue/éÚ1'ß†|áq·÷ÙgíĞ‹ß*®p‹á^6^Jßõ²}80iO©ºE¾ˆ Ñ+E©/)Ÿmi_ìË8îÊkUşØ8á¬hZˆWcó5¶½Ô—|¬mĞü3®;Z{¯8HåÊÎNo\¨3v­?j$/6Æg+ää+õÍ”ÅFyÿ¦òn£ÅiŸtG8F:5Fe'd$Ûªy9I‘‘Y‰ü\[Q\†XyìHzpË÷ÏåÅ9É‰E9ñ²Š¢H)Ë“¡ÈD4šŒ€“©/O&‘çX4)ô°¯Âö¡CœıX¯ã-òrëe^ÜnââyõÓ-‘$”“¿ä*6«êfö2ĞF’Ñ)¤È*Ôíœóøv:då:ûåê~'FÑ7'íô¶Ú|ài3kmª˜rÛF¿rŞ:°Ÿltfüş¾~y&ĞO*›_ACHŸ¬µf»Ÿs°}ôtOHà.HÁ7'êmµI`ø·"tjœ/_jĞi‘tzœKüWlúg‡©JÈÎjh»Å0Íâá6Æh®”}k`áòDØmÆ­P4ğa–
+¿/o'{q}h5Íİşœğ
+ÿ„$ZeÒŸe&[Ìm…;Mî—,Ø¤D©"N¸şcëÈ{¿Ñ6wè—’ó-v¦»zJú÷¶üù®´ıìÑô5„
+ñï£¢“û¶Èfn"(–@ ´N{”jŸº–æ·çò{ÍÑ8·+[©âïî“ @¡Ké%–ßtŞ€|8İTŞ<r¼Ò`÷¬<»Î-S
+£¹
+qR {÷×3N`;bGÜ_Í*±ÔÖe7°|˜sZ‘*L :òœã”‚œÚy-†Ér2ƒ?!Á¨QáŠ¾<şïåp'¢;N%`ãqÑŞAğR&(ùS¾/Œ	ÇËWÖŞ+Ã˜•!LïaòßÊ	2b<Œ•Sê®t÷Tz>ç£8—z£ƒŸùz#é$GÎæ`Z28\ Àåáq˜p¡8öÍëÃ»Ş'¿~õÜğC¿F"ìöI¢}£Cü>`ÿÕ#Ç ³ü‚úvhn¹0¨İ$†r'+,44WIYµuÌØØvp¬*z)®uˆo;…{úQa(¹Oàœ8Gl"ŸJ:x‘ÃÕÆ·õiÇ€ Ò%Ä,©HLÚáŸ§4lÑæÒˆüÊ®6½Ş8PŸš+áòãÄ±‡?†w—	Ğ ld%÷_‰ŸOT/™N'x|~Âøäø= ª|‡†Ú|×i£Á1Ev©Ş¯áçÅS#nªI?ÂjØ'<£«Ci×÷-+Ó=şÑÉ;Œ“µzcH˜Nrq—¶[Ô£Tz¿.·Á{şj£gÇëÑ§]üÓß¼bÕ–±¹hsBå„^+í:CòëTúbpä;¸ŞÃr™£hò†®.ŸdËn?=-ı„c4;Öœq2B5ãÆ6 dCé†ğ?9œ¶:öéTğ„	ÓL]æ””¯DdşYAË®—xhş:tÉM$f~“U/’ıÑ!9?œEËk$eÂtP³©éìôeI¾!;=”™ZÂ’™ a×»û¾ˆmó¨Üğä´ÔÊdL¥zr7ÜŒ¿ß‹ªûF'[›ûÛA²Ã‰¸vÄb°Ã½»II‰AVæqL.ç×{ÃMîr™mÌ§ µGË$S 4øÇ84»1Ê°
+ÎĞg¹X*×·2ÊØ÷`Ã¨)¾på€<æâŠáúç¦D2´ˆ§*'¤Æ³Q†¯Äwa®éjD\œ¢Y½/6M·?µ3~eİ§Ú‚[Ir·n½£räw„®úåô~-àíâóG)×‚8FéCµµ¿!Ñh2ÀÅù™ë5{WÍ·a},‰ñ™‰A‰‘^ú¤’ u|
+‡úX·ĞP;şÿ­J‰}bş/Ñ¶•ıÏ‰ï„Ã=œ· v»ië/Eµúó2Dş©+Âjø²²8¥:Ò=Z©­äPfµó:ÿ¿×i(…"8#0
+o`Æá-yÙÿJ¡ÁŒÂƒñĞÛ¯€„§U‡ü‚e?,n—w§cQĞûwùC WÉHùWê
+Î™_Ñ:t÷$†'ÂåàÂªƒ”ïçwÕRi\™PUôû|=#v]ÚHÃ™;Z^¯óZZd]p®¼¿_÷˜‹ r/ÅnS‹9 •¦½óŞäİ¯h¨¶UĞD›Öè`üøq?¿Ÿ	šÚ“e.ÒD¦ıOAy¼ğJ N&t-P×ú¨§«9</¼F‘Nq®^íEB2?zÎÁš(öGí æZ2[şßuƒ§iİePì¯¢4SÁı«›_?™b1ê¢°’åõÁÍ›æ±µİ¦í3ô]~ÇõoÇ1á
+ùñÈæÚ î:“ôœW ‚êí£_O×Çg’şÃ(ç©§dd2~q”Y=s¾'SYŞõíj^¡y¶nÚµlP…«‰¤|ª‚2Â‘¿vİwyÖÇ‘´ğVïHÏì±_\õVÏ†¿^ªÇ¾½n€~ı®n¨³`’sõş,¿”</óe%ß;~Úé=Ìïæİ¹´«znÑ›q—¹›9à÷zü÷ }-OËœ=ıü·çåfÀÅg/Ú>Ä¿m~|Oüu—Ï-+d“|K°wëü¶›¯şiûšk_©õ¿şe7ñÆ¬Û¿Kçß­ó[&^ú%ôÿî}{h!'Ü}®|"j*}:f+¿)~>¬»÷›K”D3ñÊ¥İ¿ºì–‡g.ŸytáŠ;ÿ÷Ê„yìª’õÃyo®~TûŞ«œ×ù¹µ\»uúğuŸ^4=›-»a~(ó§›øl#;’ÃWš¹7-¸Â>ÿã†[Öÿte×mùVã«ô}ègí7ãŸ— Ì"D ‚ƒHE”#zß#¤d#ã‘EÈvä0rå†
+C%¡JP¨aÔJğ£€‡op4‡öAlì¼¸8„Ybì0p‡Ñ`š1FÌ<æÌ4öOìv;‹‹âlp(ÜI</Çà[ğFüAAĞf‚¥D±x‡#Õ“zIWHïııÈ!äAÊnŠ”¢ ÔRF)ŸQ­©4ªœæAk¡Ğş	Î¤÷„°‚ŸJÑ!ÊûŒæv¦„ÌŒb0»™ÓÌÌæO¬-,S–'+˜Åg¥°ŠYÿ……°¯†¦„ŞS¬ïü³[ëo­ÿ¼òÇÊ¿G{şÁ†Õ6Âßô¿pË3ny­gÃ/W ±AfH M ²(P@ä~µ™hNÚ«¡jK®ÚÅ\ÔO…eÛ‚{C'ş«í¿÷ƒñq1¿I'ï€­'u%ëØlY<: ç{ñO+Œ{şQ¬?0ò ’E½·×sšßõÏd¼Yúy¢LàÿfBş¯¨íèe@}1±{2ÇŠ7BNœ^u GZÌZÚXnnÔÌB:~Up@ÎÁ"Ò@„©k¨W¥¾_—™™mBˆ˜å³ó»É=êq%L6÷Z‡ jy@ÜÁô°Åü¬¸H9iE„e/z¾–ş,¾ƒeı/ñ;[˜¾_¶º)wÏà?²'a1òÕº[}ÚtOı€E×ÌiÎ^’è‡ı3º¶Ğ¿ëvÚ«#_zò3ñ¯´8QL–qä’Ÿÿï'Ã+å[¿{;c•ôÏ»®ñş(‚(fÚ¯nßÎ÷	Ë~å­´¨4rá~·7iıy1QÆœh_=½šnÂğÒÉgaõl]ç6z›õ¨ºüEÂ@ —Ïî½WŞ>§Ó-µÍ´-«7ÇÎrÍí™dôç/Yš(Q ü=|¬k$Üç~#Á®ˆ¡i
+¸iÇÕĞa¯ë¨à;Q¶])OßoWÏÄõëŸoé1»uÂÛE`Êç³5FßQ
+±Ÿ{½†BD±=ü:ÛÚì5Ãù;îÚñş7(,Ì}ûW™c£¯?ğ!UèwïÖß}òÉ¯K:?=™Õ^Ùxø¼œ	Ññ„ ŸpPLqè/ı‡1ÃÎGŞí	Œ}‹Ò­ÀùŠräãµÏ‹”Šäáá©{?n5³=¼yóa[Ë=uÍ­­á,’Ï!ó'÷\êcúÍµñ¾˜öÎ±µ÷xñÉMKP
+u£EÖ‹„ Š0Y¸õs€;uî¿•t«YŒâ´À²x‚µãZ¬#
+ÚÛ€0°ŸÁ‚©˜[±93^O4T½ÃLØÒL?N­5d6RÿœésÙ•l{˜l)ıûè®2›$–\ı(ïq}DõÔH4åûÚŒ¬`iÃ@è×?úÃeÛAgûÕ¯ò‹ F˜`2DK?o›ŸÒ¸ú~Ì/¢ogsXëYvzKıZ¶¿Â=şÒÙ"r¹í8!´5ØZ5ƒè¶îálğ‘­‚Y|½\é¹v6ÒéãĞÍ€a¸äoå•PJ(£f˜–>¶/{ß#v¤¾¨zÃ¼]o4v!Î–#HU~o´–B4¸B„®	-­0¬@!l®’2H`ş”jhªÎÄÏwÌƒgŠ€ë”³ƒ9ŒaC‹
+’®„…¦èÏUAœ4)@İŒ0óÎŠšîèzÅßÉ(•§	äô}µaqüù+[ŠÍOşDtyŠC¨-uYâƒ‚4véä™¾!µ;ÿua¶ç¦İ/¯¿¶hãŒ,9á7²~Ãàš)È!Pka>£H:OBÄŸ™~rÿtkÂ›h°Æ5ò£çsUsKŸÇ3ïç1n›ˆ¡‘C¸MÔ’‹vR10™oT|#oöŒÀ8¦;ŞâÊµê•mâ*"	hÓJ‰?}àuÊn¿™‚,]Jƒ—6Şx3@¯JWt;ÆÉfë	Xi¦£¹œÿ.Û#µo[µ¦®3%bÕÕ6×>ÓÜ1^¾…‚.t>Íğúİ=öğúùĞõÅİM=¥ˆ‘	Ğè^\3o£”·dãN2!iñJ_ÍSBÕO˜3P­‰ÕúÄ3€ã:åŠ¡82&@ßl"bä|(f€â+yjs™$ş'‚7W£¸±(n ¼ré½EÎr?
+>KüR«p0úÖ@Z•BFõÒiæx4‘Y*u'h"Ìv¤P@#x†*—Ä”óu@@¯*bF	½±J‚Y¶[—H&ê·$4€7O3$€±*	c†¬ŒHééV=h¥+uı›3Ñ-K±F./ËçbÈ1ğ9eÔT:RéµƒÕàşd"nªºˆÑW®]æñ$gû¼\<Ğå|…&Ô?„nPbâù¶½w­úÿ˜è\k€‹r‚5ıûª}öË÷í‹éí‰×7VñòöÕõ†\? ,–Á19ÎEÿâØäi¯›)ò«³Õ.¯Ëåt›T4òp)Gøp	<œÌCÕƒ!?4«ò€Ä>¼Z–Í<ç\½1²lntù†_¾ñóK§ş>´ïıÿàï ”5µì¶HšµN ÿ÷X,]DF8LüZD,aD„®Äë¦2`½ßN*Qjáª£Ñ¬:”¬$#Aæ×Ç2à3õMqBÓú•j§¢änÚ+ºc¯¨~c³=$_ægX‡¦vÖÿm"x3®]z~|ãërKmÀ49fYÍ„^­³¢e×m—l·ÇåÂzÏJ/ï€mœ–ÕÁŠFˆG‹Õt®¦3›MMD@µEfõ_:”¼™“#—ètEa…Çô]´CƒÁn@Ìë–aù@Ï¥Ğ(âqY,’àL+ÓYALÕŠ ¨bebªeÎ‹]ß9^Ï#4¬ñèPWCîlë„*`°pC!y@+'î‘"OÁÈOÇ	nkŸ”ÆØ$…Q‚£6~ò–BèiŸ8X»öAÁMÁšI^–j¥aÆ¬wÆöÛ+Zè•¹ÿ÷;u%üáÖ5$”Ò%T)­Xœj Sõ• rAZz]Nü: (CjöPpâ7öEg’((ºqr3ù"(*Ê‡ƒvxÙx¿uü·¬—acó`Ÿ›{f,oŠy|I¥‚B™¶¢§°ƒ}NAÊŠN¼L}TY9½Tñø¾!ü^õFua8,ÃÔç§uJåàë}úÉø†¼c$Nøî?R•1¿dIªÄNøTùpı3Ua¨]l .Òn“"5§¦°2¿M¥ ˜Ëq£ÖÈŸŞæxÎ\«=ZR¥dÌJä3İšÅÌğÕ†u‘:{8: "#¤#µåš“¦üc½>m~®yjTCokî¬²Ğ]5¸)KoÆ¥ïj
+xÏÅµÂ	'é2M‡ÁŒlğÿ¾&/°å²óHªûáã¦ô4Rà	é‚Ì3ÇÈ‰j>EN00>•Çh²dgĞJ¡ äÒ†˜@«AQeèjÂ`¹ÅÆ	29‚ó&häp¯hV/¦*à®tÊ˜Ê®m¤DM&‹Õ†ælìuŒá‘r§ı›ı²ãQÙWÜ£Nå¾ÎÒ
+ k†Îd¤?;Uà&åB³HnæÒÙÚ‰B ÔTF‘°0»ÌV®\®ŒÑfÇÀ…ªšLé¿YìÏÄşàiót/{-Û‚õ™Ù¿Ñülu¯éÕ’¨R7£1 ›T±ô9X¤óI·-uylêÜÉä+Ùfá\n¢4­„JXLX*¿î[ìÕøu^˜®°g¼T»¶e9ª?Š¢Ù#“{ jMì‘	+ié’;İ•ÃP[[ú\ãÍs£ù‘1“Éâw;>|(Q%İëÎ—Ùx¥êÇH ’8|K;Õd‡ Ï™¤¾È¢kuß¯üûáKÉ˜î‘AÉh{¹—®ªÛQPxáŸ±u
+¬46¯„­^­v„'ÆfØƒ†À¸zÜêÄM¨öCša¨‘ÇåZtêh¨ê¯ñK£íe¢l´´å&bäD1o¹É’§´uªG½;g£-‰àÜ¨¦4ÍÉ|ù›CtæÙK÷ağÀ>yFÈnùÌ!å%%*"ƒñ‹¯<ª‹?<¯ŒD³QzşÄ–5)?¸ßµYçµd¨;ÅqJ¢Ï¥{tßy•Õ¬ğIüü@{<õÔ™†*e9±å¨‹Ü*7Û^b­w_ú &r;R[İGü1+ÑìÓt8oÂªıÌ~Ï#O:
+Væóé$Ìºİ®Å€gbâZE®FZ(ÔTP4_ZNsAxj/,×Ä&õÿ¦Ê®SH‡£ñ+CÛQÃ÷
+Ğš‚4Å	Y´<ÏNe‹U.Ó\<d[†ElJTƒïÂ~y"ƒqÖO¬ôjÂ5Ü¢ÏŠÍ3…B>å´1D
+ÅÒ1øìçµXy®_¯‹©úöÚØîBËmw»¹:ôÙu›ŸÑàâác]*I±¬ƒ´éºŠÁäatò§~ñBÙÈü«Vµü%`-Õ‘ªU1Î‡š"J$ğÍ´-v+io¦5*,‰ÒáÒÛ'O<ÿŠ^ãô¤>Ó%œÑ)¸ TÃëq»Ù”¥šCŞ=¨ù„Õ½ô9~µ½~úÅ“í'Àó¾½á\}#I@Ğüx-5lAÊ7Ñòîò¤}JÃÃ&-AjEïUŒ#ÎkTÒ€¢ó¨ëõ2HÚqü ]W—pc”w3	 7W‰¡0ÊHª•‰—Â)?–.Æ-AºSßtH8#«ISÃ×•U”xUŞŠ1Tö·”³BÈ6³FRà¡„&ŒPÏ¬dmƒƒ¯L-õ±/ïØ2·.ulËÕ¶Û—ÈÓMø À-Â›¥R>|8ˆåRAkd,à"áCjÒá2lçâ‰"ş¨1¯NšõNUí+©/òÕ·³*…H©Î16Á½Ï¶H¡pª'Ö…•DPÛû¨Î¤İûÕƒ½Å_\Ş±C8c!˜¡ºöõ½|=zõ=¿•°àmm“G 	ãÕN[ëYLÚÔ,aóèÌê98²}„‚)vaWÏ!Ï(í]£µ>®ÿrz`{!¼Üo}æõNf@HÏú.k$Šj³ );æàÑr¡P­g˜`^HÊ™ñRÿj
+Şî1Å+¥íxXF'KÇ‹f
+ŞêBš‡=İPIšÕs‚qwƒ=ÈR·G|½fZ’
+“½À²†h©°Ô‹èKWÊ•Faœ±œàªkáëá‰KrüšÕ'±)
+Ëï‰•¨ñ¢W!è@1D?<mîêv°ˆiú«ãèš ëš´$ó,V©`ùê…‹tD¶1‘ÏWšMÙ¡Í¥Ú“·g(øğ-óşŞWÓ]T(Áö;P¥6]/`æ˜3ƒîh™Z29íßwÆ#M-¶Èa¢ÅåSxcı¯®»GÏ3y™ùªKä¾ºƒ{w#"qÕsqØ»„C.Åú…üà³åı(·=ç½KØ9æïv¯>[Šrásqä»„—Ãj°>y®x(Š‚Ö\7&õúx¢ØÀ¦c–afÈy•Ix+Fíd@›óõm†ˆQî‘ÑMıß¨„Øç"ZisÊË4¶é÷cÇAÎ³C1j1!ş­O›úÜXjê ›ÙfÇÁ£†6u†z>ú :ûü“* oVØ¢¾x­¸ÌTï+—£cãœv–Éû¯øl€ß™úØ“©ı¹îéŞ(
+…¬e?¾ªûZ²=cÊèæT4|Gû‚mhŠÁÅ;zñ= %o;äŞÅ/C¨ö÷{vO¾ïû1~ù×\> ‡eÎ >ÛhkBaîO>mYğäõì¾&—’ÊUÏÙsğ!·Ÿp¦N:·L»“Ös@¾k	„0bV°Ë¶"ız_¥„F®5jÂVrAåR8µ—ït^ThEâ	Öv“_—¸“!Gån¨¾ÅõÿìY‹
+Úö&,6kgäƒı­µ„Z³"õ†Â‘*Ø òï:=xGG)ÆY³$‡fÓğë—q924?ôğ£·¶UYáÑ®%+3nwûú"»ºÀ/¹v0šÄø„„ö-EŒˆhÁ8­í'Ï<×$)ğmo=&‰	f6pãÃLgáİ$‰Óú•uY„Õ¯'@<—3ğOƒßáÄêáÖ	%n·¥‰“ ƒæ¤¨(bqaM“41Ö«q='ÔxÁ(Îë'<mXÅs/`CVe•ER¹“àˆI}‡pVV—CŞ´¤©½^TÁéOH½‚)¢“¤í/²<v­¨ÜˆebOXZä¬hôƒ‚(ÀÜ$‡$4-"q×˜à‚w€²ª^¯Õ¹°$çÏ‹mò:ób`ß6ÈØÊááš*b~E§­0SXÆ49ÈßiÓâ:m©˜ v’I‡·î¡V1F8€Í…-!Ë†ë&ÄékÚĞZî	^›¢¡k$G°1Ñj-n ãT=7p“b[ã11 M	¤5µal0àú¼>~ÿyêÇbÁéÌW7	¸gŠ„w\•vk5dŠ SF±…JØ›¹Uòx2„'µê*³ÜBb	~#Ÿ—gyŸãj†œÇ±§5…øºr.}üøæÖ˜<ÙaP‡eû¾“©+Z®­²,Çy1»¦Éi÷GĞæÊ Îà
+İ«a»6>^ìÑØÄ>VTDQ¸eHr«?àû)nx$lİêŒû‚şÿœ&CWÏ0PH°Ÿ?|ñYc®¤ÒwãW9ôÉ!r©îÇl)şÊëC#şû4>¾µu>úY÷Š¿oPx!î±XJ^ÛÔ g¨×°ç€Û®œö»Ç<<Íä*!î÷ºûİ¦x³)ñC¹XüÖ
+DñÆ‹QÍ«†§E0j ÷!’X¼ÜQ¤ik&`CÛnèÚ_Ğz54Í_4;ŸGdK{{‚uÛPuÕSÿuëµ“Ñ©«ŒN¼ú}ÀL¯¸™Çj„Ô1%Bã²f=,:v¦ ·ş-JİíãÙ,¤ôİ{]’B´Ê#yœ5Ãë1§Ä¹Ç
+“›íï·°¶Ç	ŞxiEd}1¼Ì•¼5‰™ûè9ÜRö¯±›so^õ½¼Q0}Jy|.q¤—H4Âa§”,æªñóéËQÖ/oÈá‘ˆ2ŠÂÌ˜é+4eÀ«WÒú4Íxf<"e„áÔØ˜.›îßñ%õÆ‰&Ê¾ù”û§es*ÒNtÅéïlrUîòxÌrŒ‹'MG‡•5¼ê.bp )i1]*ö‹PÌìÉ3ğè
+—Ğß;_™O$ğŸ
+–Òíf>ë‘5°^¿ƒhQÒûKgà¤é	‘2Š©lŒ†â¨cÇ;ÜØ…" ]9à÷Öª®ñtíbU¸LÄãâ„
+h¿á:óÅ"îœ‡Bb[AQ½rªışúÈ-ç'•ÕƒoÂ
+”ã_ş  ùvéM_—ºªhÎÕ÷ØwLµø£¥6}O·.W-ÿ¸\µ40GÂEğ~	ê±Q‡á:ùŞ¨3Êö¢â -Î{/vø~D½]öÇ[±>ÿ¤4+wèç«ëÿĞå×ynF3ò:nO¿Êãˆ2©±ı}/Ÿ{/öğQÉkÏE «‡œû>’>ßÔ ËÓãğ©(Ùí™>‹¿ùfÁ¢Ã××í³ë–Æ4BcŞUMÿ²4³ÂbñÃW«Í«J/ùÙˆŒvİ¢;<çBp‘ôóDÆPn]ªù¡?ÿÈUÎèí¸t.»
+¨Ø|7h)—z÷'ÒU»®+y4!EÒeêDˆ¬1¬ıå´0ÇØÚÂm’JL}®ª»¼Ø!sÁ7.³¬¬û<©íáG¤:¡>0ÚZà¯şàµ»*÷Â2¥¸ÄùJI§õÉ(•¨“·ª1R‚™RÿÇñ)¦ê^UÔ­ÔßnÙ?xª¿üv~®õP-LÈ~ïOe¸îÜ» 'ìÈE} ’g=ï.¨/ğ‚ÃÉ›b¯ØŒóqPf«ß(ø2ùğûvĞ7ì#)	lW°ºªi²İpñ"'DÒ†n.#_&0•1p¤åKù¦“Aáp]URQº	dÌ2ƒ B¬Êî
+Š<N“:æ©ĞW,dboÅuwp,bÎdø ZQQ‰[Ä!ßø^º&N¾&:vtæ¿§ˆF¥ ÖªÕ ıßÆıñøe>¼î~$:	)äKùd`åM¯­›åZ_Ù«($hÄO£SÿE SÂ—Æ+ùáHòu/ñQ¸3ä‡ŸA "}õıI”<SmŸW ëw]óÉ»,÷%y¹Óœši±T7¸Ì¸3Õæ“fÃÄÃç™¼ÏØ³ÿÜc©5êòîÍI–Úà2RÈ•1ıä+bë7ºÏùJ]3â XÏ€­¡ëHˆ8¡?ÛÑZN‚¶Ç´ã{6ğ‡|N(úÇÙ ¸ ±şø­ÿHËš4õOñ†ü‘n`Ì›ùSùqvYÅ2
+¤ÏjèY.÷Hğè«?Éb•ûå)ìy¾|¤mÉh‘eühö2ª+Âî…w •KÇìÃ[«Xùt`(&u_˜šÆı_Ó–±ôë?M[n»^ÚG!YNAWñ±üğráü$u0Æîÿ?.ˆBáâJ³òóqeü¥€ŞÛóPËˆ”û,äµåéãº;+@DHLıÅªÒ,‚²d5Ü‹îÒc.ä‘ŞåF¾¸áEXŸÕC·ÛÏ^
+DOe-¾¦îÍ+¦İ55®`)ÍxúüDvˆšÊ‰pg”=?âfÉìóR®êïˆƒC½Qjï€Í¥pP×Y“Ígu
+N•Ä¯<Ò)f»`5yËİ¦:«7¶µy7±†°Öø¿“	„`×&ĞªÇÚğĞc úJá99Ş#C)*ÔÊ4jÍQ¦ÜİÃˆ4±ç¶«ÿ; *xƒ²ƒÊ!Û##%¬ÏT´¡Ä%Y÷D.ˆv ¥;øëS*j¥xê
+®ÚˆÄëX³Ê%˜p™1İnî0^Ô…aLQ*$ÈšŸÕÜ-Ìg~$ÈÊP¶{X–1Ó·6—¾Ô>Š· ÷-éG7‘¬¦Î…Âí"^ğÎÙZíMs8_nuÛÉÃÙWÿõWŞzà¢]Dq
+Ü¿-Mâ•Õ£ÍHµgnW¯ê™"WóŞûòO£`ÜûËÉ;A7S§Ï\7Ê¶2e¬v¦tÌ×(	ı Í÷~ºà÷«õ—(ÇrİŒÑCÜÖ.!¿2^AÏ'qé‰Úãõ<ƒc­:c«§¹ãÕ½8ßÀÊQùX³«Zµdr[GnçÃÄE—@§Ï,ù¸*´gUÏÖşª]ç=´ü{şÀ]å‰¥÷~9·#nşŸã®x¼¾)êr±’LoGœKõ÷B8[âœ:;kŒÓ@©üÍ¸ûÛ+ t«»˜ÿú…Xú øS×úrIâÕş˜.§œr»Ïyã_­L÷AøêrÕ-»d	‘9W¬§hR¬@£Ô/éå.¹¨û‹˜Áê2Í(.è%‹DÄupª½’¡"†¦¢†S§¢
+ggwÇª‰HsSôNo¸Æ„—È€Ğq‡®Êô©“ÇiºşQ>ÚÂ[Ä6
+•ĞL¨æ¯ì\Î0k0‡p)XÔ,tÁGº”"±B^êpòüD®ÆõúF}¾ ò
+Íyº_ql%ı@lœ÷>¡Ñ¨mZ§>÷{ˆ}›×·w·DEvÙµùCÛºÊvÚ®]c‡VVf¦BiiqÜ#ñÓÎ`V&18Í¹á*¸ç¶=íÃ'û‚¡h*Ëô%ªåVp$‚ŸË°ö¹¡9MXÚõ¢nÆŞİĞ~î}ÏıŸä”Ğ«{Üv?í‹`kÌ?æÈºPx±ôšÛ-º0ds‹³RŸ@äÿ8Ó	Ëª€ZÍ’.Õ(ØD¡@£uÜ˜M ò{î»{	9“w˜u”Œ#kß§Ùi¾NKæşuŒ–ö#‰·k9w|ê÷³— »äÿ)X"§ŞÃØ!Í8Gq0ÕÊQ[p€R-y0·Üù6—ŸBº,\İUöáIS ) çRÉàÛF¼ 0Ô-p³>Ôªµ©Ãà[ww¹ÀËz[‰S
+\8*´÷µu1›¹?ÁÜõ¸œf€¨€>&–LĞÈ‚üxÍşÚt²Ö Y–i3¢Õ¹|1ÿO¿Û’¶íÚ¦0¦~şQ)äÅ\:ÕGæÊ·“vË¤eU™ğ¸âÓ‚Á—J.w«Øt¤ü£#o"µØÂg’Áo	Œ­‡m?L ‰ğv÷BAmbí³x¸…Àeûyş¥„{Baî0˜—ûŸq$öÁG—Qİ`ñ¤–º-ó±ïğÇíÉŠ¯ïp:b•JìhI¾k7ïvºÎúõa =?½÷Åq
+Š„XGî>"q*ìü2
+­N¦ô¾NœDU‡FHÏÊl¥ñƒC/áM–+å–¼ÕÇ@Î)sOî©VT?­ÖTÇÃSı$_›_óO
+k§2
+µñ(^­ùğèÚ|¡ùFs/˜A;›IÕ¨› Pkp‚\Ø_pøä¿q÷§ŸîBÀ¦¿¤Hú:º™=‰°ŞB€ŸzÎn /’´]$„ÜÜB€Ir•Ü%Ëél«Ïªƒ‚-nÁy*,¡AÏ&n«éós:ĞÃ†Ô¬µ„Ğ»‘_•"·¤„ä@‹~ˆGşğE½Éeü?ÈUçœÍÁ<*™?ñõbéşôâıÖ*y½¡nş…ÂÇyKglkÅÃ‘·ìN,Õy¸}zºŸ~ÿ®şƒ÷Ì|Ğ
+y–ğ­ ßö^íÅ.¬¡S>ÈÏR£ì¥ t Ï5ì¬sËŠ’ÿ %¦WŸ){×k¯ı¥zfô¦ÿé½c7|÷:68œ
+=0­ôÍ—ÒÂœs5¥=´<^Şp&şqÇ,½+  §½-WRù?§Ë?ºö-KÔT Bë`1êœIı¿ŞLGb{/ lœÚlüa°Ù§/Fñ>÷¸ªèh–¾o81;ªCçàû*é†ï—WgÕ™?J²G°Ø÷alÌŒ§–¡¥×”g¼}ã‡ÇÂë´œ@Şıı`¦NQ‘åLÂ9N•ˆ!`G³x$Œ\œœ}»ßd£Òã*ó¥¶@ÄpµI.DÕbø%šè£‘¬Œ"Œ1£1Ğ—ºâá¶Bæü1Ò%‘ô[éTTC4ÉLK¢ræLõ8ÂOÁ*¨”´¼­*+U‰¹1­¦°‚ä)›ÓË8_À5P¥Ê}ÅŸ½jø^‘úŒq©'ZPÜùÆ4ËRÅı»×¬ÊyŸãÖ~|$±T¢RZWqœTLSi{u'½º}W>b8,ÙŞáôù³Ü£ZIì®ÙqCS5İ4t#|v™`é`Å9¸îñ½ï	¸ZÖ³Ÿü½D'ÖŞ&‘´Íd¢æGFÆˆ‹2÷6*y•£÷
+#ìªR`£‘ú?F#!¶İÕiH¥âK±2¾Ë ÙX2‡M†›	'F¶×³ÑJõTµüÊ
+10ˆ°‹1I®;k¹ä• WoÃl.
+ya™8Rö+¹„•Mä÷ö;üŸæ¾ó`êï¾vJ|?Ø,'XêIÓLˆ‰I¢Iä«¦§m,ËŒÜÅq†øÃùÇEğpXcBRaN9‰(ñëPsrüÂçÂoÍ=;~5)&#Y|÷…ç,'HrR)ëV+Å‰$óÄBJz<iû¯öb¦—É“}|=E.*‡ ØêIE›y…#bª]µŠgÉËÍå¼<qIMV±”iE‰È9¿V”`ÈvrH29B¯ã+¦EÜùÎê§±B|İÕ=VR0©v®İÎˆ`«bL²qŒı¨Ë/´:zru)Ûû³÷™#£º$Ö¹–Á`mU ³‡nnßÃÀ)‹›xvGìV¾×+š[¹yÙrÂ("#j‡ƒŒg™ÜÑxœ%œÒ‘©hDÀu®Û+ğÂˆ3‚‘TAiô¾YVt½8+S1DÀH€
+‚±©ëxVÏd(}Ô+EÚ¶u- œFi€¡…­¬j¤Ñ|üÂd,âEïõ}îT¯?š½ôh,Sç×vêXlV¨fI“T]7ÊÇÎR—”şêfT»ù­5ã›ª·g]ıàöW/h<½NóòÉŠİt©åÎ×Ÿ6:õØİ JcŒ> ¬¨dUÇ ^:›m^O€v\²@˜A
+n×â.Ïşı~µëùğD¿¯¤A¤Í”A²u ;QÄ–ŞW%‚axÉ”<ZAƒVWcW˜ohySºòtU*¦±EAfËÒğ%¯œöç˜y#ë;=ÖkwùR‚¹¤LuE{ğƒq-|˜
+ª„İ¦.İÊU%ù3%Ò2ÀàhHÛ6t#‘õ+ÛVĞ±:MÊÅÑr«ÕêŒ%Ş«ìŒR j¦ĞíUe/(R‘8/~4sûhp‰,Â`pié`í¡â|¶tİ«ş¼øÔ<`•_şë…ød8Ò^ ½„'á"CÓÇ‚Iœ›Pjş**$uŒo¬WÄæ¢?Œ*ÊŸæ˜x„ã[×•ÚfºRÑéàóoõkfx—¹²Nééè_ÎH³.»‘ç}ŸQÄ˜¸—Û×‡9o×òÖv\l:Ç@ĞÿÀŒ¦.èTÁOmÏ[î7õÅ©]ÚTãÉàş«Äakú|?wGjC¿˜ai³3°‚’nbYš†¢‹¯Ã´.Ë"”ĞZ¥s²…q‘ù­?MsbÓ‘AW[quô(00ÁÅ‰J×¹H;mÆ”´8XQ77iÜT©ĞP³Ğ½×CFË„J±pRáù™y‡20â¨3‚’¤ö„±2ßb,Ç¨9FÒéVixx†£¦Læµ„Fs°ÕáÑÚlŠ\'<:?æä‹±ÂÙ<sKµ+‚®Å€bÏ˜0ª3ªİÎs¬ˆ¦Xv_	ÕÁÙ²&;º‘©Ö©aŞæAĞâ-®oµÂRir.ô‡f®¤ı°#yU²ŞeMËğ'Ù.¯iÊ6Ôµ-42ãÈK¦>‘Út`Æ>˜.„úÆÕ+mQ["šP½rç*rì­™ä±¼7mÊ¦— )Ò$ÚUf	£AˆëyQ·´“É©òßG'Ÿ±Yg^g*kè3Ù àµĞ>S\¥ãkcŞÙåš…ÍjÆŒ­éU”N½À¶Ûêšğ%ÓñÅÑ<Uš’M¼;Ó±Da*bà'ô–ëårMî»—&R@–ÛòeHo «…xªùöÄºø­¢0€e‘ ÃD[ºÖİ"w”¶¥ÉP®üÔM-XÆÿjç£&†¨#ìéZL;}ãU4TßÒšàgy­‹|»Üi”=g:šĞÃ¿
+ªQGQ
+PŠI% …Á¼©È$“‹@¯-IĞ&\ÑÔ”–¯Ê6¶Œ¼ çìK7‚ù7”³ÎÑ ë$Y(›T*)tšÑ§Ï¦*~J¬M¶!ü'zæ-‡\_ÜeÖX«)ÙÌQ×öUá·é‚ĞÍİ›’¶©Èº¡Xî2 ° ¥[Qu2Ÿ™èQ%–âá;Æ¬$ıŞ'´wÿY£şLKyÁ0¼6-"¿É7™W§—_œ^©eMAœàk¼ú‹‚BÆæñ°PS1nÆà
+¹­m:ô½ÑKVt(-‰‹öBÇı—Œ°ĞGÙ9ÔÊx#Ëe‰³‘¼\aï]ÃzµÙµ…f2ñüÙr±vú¼>½|*±Ât=>Ó¯hD„«<¥•[=êÉJ½G‰QÒ }İè'…ŒLË–÷×š¦&øS¼óÔ-âñ¶!n>æfwÆ²ÀË4·5Üø¼:š ¹×OÃ–5?Ë‹•)çx+[)2 ÍE C m‹Ò?Íı_Ÿ Ù‡ğa ğº’a—›^ùmK‘IV.×N‘+c)Í(ÌÔî\:qa°©7_šğ¹­S^ó-ã˜±² ÷Tê5^¥QéYß–whBîb4ãy)p1«GÛç‹­¶?ÅjqºÊn~µPo´ZÕrU&AFÌRü¤d*P˜ÃÎõXíˆª´1•‹Z&¼iZ	Á	»Xt…‘œ2³ØŞ¢*R}€Bì¹ßG{Û70"Éü¿»7j•d„¬Ò«çæ+h‡-Ş‰X‰£2=üñÒy‚ñ:ÌçoIN½àDfœ+Õji^í)ŒÓËÎ09¬¼I8ZnöåXÉ‚^òéÌD@ÿ…RRiØ»*nxø^t¬y€8åzo–‰ÎÄ“Mœì‰2Ş©¬V#¤f']gœsº*n”8!U"¼~¾ÀÙNÉ¤ı€#ù|Ú-İ[`;fÂYİ­gNè•"eDåx,V`ÌuÁµuG1pXÉà!LFQñætW(Ía}7Äb§ü¹­jJ¦Ñ¨š¡è0JÌ´êe×èÓñ°Â´µm¼‡5JtÓ8J€JÏòq^[¼±Ş›ñ)ÈÙ“;Wm!0Ë3Õ³­ÒÚ<Õ®×·8íÉ/ü>Ü«ƒñ÷W=D [Â>NG›gäÓÉIKeÕÉká&súÄö€î†İğ†RæŒÒâUQ8²KŠ“è\:K5:S•DOj(rÏÒKˆÂ˜²¶C„`9‹¹°ZM2Uí±çb)X‘/ªı{(L*¬ÛİúKz]í‰ešÍ(ûa¾ÓÛuJ“í›÷!”Ò…üÉu›•MLS°œe0Skã=ÏT„oödm›Xµ½A#ïC|Äz!|¸–i:qšH„\4q|8ß
+RÁ-¤ù­$á_îâ¸´’Š·—È£¾úı"ª¦­×‘s­²Ä¡iœH[ŸH€<Lºi6Ëi§Ovİ·»øi¬İ×i¥ËìAL£@	Wåİ‘Iä$Z¬òdŸQ9½ÒP}C`xw	œOµ‹ùz=Ñ‡ƒšiAztó{s+°c4RÍ(
+KtZxejc !ØZ¥°–³‹“MÉû6™Ák	0{Şªş…<Ø,Ãš©mÉ8F¥®æºmó|ÿEÿ$®ôT¢sù›Ò†Ébò‰>AEæÎw+e2Õ—·1£G¿nÂ>u¿ÃˆÜ>‹‚•qtêf£l²ò2…9¥Fc6ÚßS–Ñ^ùóÿÕ÷zxÛÓ1h*ÂZ­ÑQ¯æ–'’W™úB>·²XúXG,~ÿ}aÖ¥èeÏÃ6¡³¸¸¬é9”IÑÜˆ˜d¥º„~È´œl•
+ÄVXè°ë6´gyèÖ×? ƒ@œ^*´C´€ÕÇB€2@-Álí“õõ*ĞAè#œæ ¤b‹¨ÍÊ°O<Ññ¡goïƒAyæ ¦IˆƒŒ´W¢ÊÏö¹¬Q¬[¶K ’0¦s¬WW™8 mã8G Œ©Ã˜¦%sâù(¨Ö# BßLÈL%î%—öÜ|:¸Ğ×(Nµ8Ç³ÕpÃì±%—}õ)A¯¹Ë+Ù‰G”¨®¡€â`Kvˆµ›ZÀI"9_¿öíhLt%NrCX:ÀÙèïFš‚—+íV³šöç$¦‹‘•,{Ú9²£şëE©Ù1ZoLÕ×5v3bıqÒpE.|4ä–›ÆK’õy~—å-P`Õ÷wiÉ­–¸½êWb_)šN4'BaÎ¹KBêÁ°•7"9ÎXU^×(„ÙZšìF–& _¹Ól”ÆŒBæ®qÈ×…¹¼Í)Èi8ê(öÍ©«£¶İWš’ïg¨¯ÜNâ`´…Ë¬µû70i£yó»G§!^â—­ªkã,=¸&ë÷G6Š«²È¹+í8.4:¾mbÀLs©â!¢f”áöl®gV{‘³|Ì³ àjZ©xÃ.mÌ®S&Ym„ùoˆ|O/@gçv)É)ã1³BbÆÔ.Œº:í»VFõŒY¹çùn gªc!­q;ê9Z¼y™,dK”*Ìô¿:UÑÇ‡œ~Šºa>nÔÛmî9| Í ‘—ˆû//iƒŸÿ²6»p§h)-ë8OZ!å@“Z´(n'é*p„òÊãnÿG×°F« w~ÓÜE¬Ô°ÿ·÷'û»¶ËXGÈa¯EŸÃI<T#à¨0Î2bÂ—†nÅ²¡¤©šü'@;mµ
+»Şò;Æ 9fı‰¡Ñğ§çZä½µ>ùM€ÓğùUç®å
+åj­RCÑF`rÑÂdõË¯Ş¾zóR™g7şş«pëÆêõÕÕ…Ë—×Z{€Ax|Œæû@`0ˆ7ó_ZúJ1qóN¹WÆŒcä_ÇìÛ·o?yìÖ!~š`Qx\(àqÂğÎ0bù"Œÿ]È‰ƒ÷Ş(U˜¸èãrß”r­ ÇÁñ6†š%ù“TùB©x‘6Æ'U~ãûc}•+k©Z®ºp­ëÆÊ»J –H¼9Jfığ_[¾ğŠ)Û¦r›TıVı‡â5÷¼¯'¤9š€jY×7æš%×ç"N”HˆÛ±ûTËnı|D(~¡%W}I&z8‚0CáùÕd“IYúüµ)ıL{µ¤ØjÁÓUkÆ£“QZ±˜ L0Å`ì¿]“Ãxûûìú8Hgñ;Øgtjµ¨½¤h…Bü™øÙå$şYl¨d8cø½À7~Š<'†çÙı
+:ì˜½bH¾ ßi%~Ç’ı‰»şg(4qá—ú±@aÆ$\Ç;cTä:-Ô¶Áu>½óÖÛe­¼®a¹âıê¬ÒÃy{Öt+<A0°W•Æ~±œ…áÜ™òÍÇ„5J÷ƒ÷áüÚ*Ì´ÅÅ®´•pĞÔ®ëİT/ãâ~ÊÔªU«•j­Ñ¬æC ‡Y8>Ñ¼VyïÒ®Ü[¥C	–.È^·n¯q…›1N£zÔ9¿ZãVè‰8ÈM¦iƒ>5á¨
+…c>Âq«ƒR‰#tixXƒÅ·]7†gÖãûì–şU*Î4†¯®ÁÜ,É§Çëxïé?óŞkoù/ßqğÊ½Q®õ÷~CH¥¿åGÆ´ı!‰D’˜bk¿vÑÚÀÛZİá6Ë*÷ËÅbìd?ÊyM%ßTôËg†zÊ
+’t@P{`ÖŸ8tC¥`)=İ`p(±#²ÃĞ"Ó}˜…*]EYG•Õö!7Å¡l%IMØu°ÏôÎm×ÛX©P¸£”s´”sœßZcƒ4«‹IÅ*LÅbc·äñÂoŞª½p‹ºç››dÀBÆ¦Ç¸˜ûyï½æY‚ß\ Öôùsìx—ëù+:ÍõeêšãŞ°×ÒË‚“-‰…E®^9AõY `øæ–“ã¡.+^ô\şñ T>Ø…!.RD·Á6¸¶¦4›ĞSu¢Œd¥J…iœ1ˆà•,¬(i¯éê¶"J°ë„ç‰Æ>3_)˜ZÕåå™(ÎK,œ&n´¾ˆm;U.3‚À%ívµ¸Ï·ÍUƒÃ£„yğ¨°Ù^¶×´4&Ê,&tÈ‰M¾]9Ûb5”Qí\¹ü·B©I6iwÔ%ˆÍb•Ë¼®+ÉErøæÈ­>$hä·%uÉw_Ó(‡ßTÕÿ6L¬èáLÀ‰­˜ã»‘/÷P˜0(ÚĞYé÷¿®«!™ŸZÌu¢RoğÔÖ(ıË""EaœdQ¿´Â0‹p£f¼š÷s“*ãdMà½]Œ	?jğK{Î14Úæé*¥dßé«×ähõZ/ÅréTv(ŸSZ—'“v[3J¹"jQÈæ2^:í¨Gk£¦âŞ/{@ÎŠd¸ÍúÉäSiB}a…3HK}©æñ*¥Ø–£õ)µ
+Ÿm.]^;¦1.ÛTÃİ´çq=¿ù‚’Õóc„OÀg×á°ñcÉÒ-—›Cğı•øùş~ö>ÔƒK)UÃÁ±=Ü®}wbƒÃ‘Ôw°œ:çby¢á×ãÎ›$æd@á­wO+7“A½%dVQ×Çip qŞP€Ëê‡ŸS/*(¡&–Í¬#«”Š>$ÒÂIôú<!—.T_:ÎœHœƒÌŒiJ¤ ì¨f]»Å&ñ…d±?
+‘# ziòeÎ×ş¯ç4Rµ\Q5EÕdµÑhmVrÔ-ŒZt#aÎ‡ƒæFã D"í
+“–qkS,]‹ë[Ô$"µxÇÈ~'\~Şª^¸ñ¢í<ªN;±Û'‘G‰áá‡‘>¤/÷G­½Š’$‹0Dİ4gÑ²iE;/Å\²±s¨ªš:Ëó[É=D)JEæzÍìyûxÃOaY‹Š³ìfe+Dn¶¦]ÂÒ¢Æ|æ1¾0Bßo[Wğ_ş—în)Oò‘™Ùo„=³ñ_ »ŠÄš?e¼5nˆºGGx-ƒV:µ¶{=R:ß¸§ k%”ròDµì7p‚©>}ìrjØ¯$2†[´â”Ğ€•‡v“ßšl]SÍ,xJ]o jò…¤÷—-°07+pHKdB‰È%|¤ı¦æÄ}³LO›Ïs è:Xe'Ü eJ][b!•*šÁ ŸƒÇ›Š¹†Î§
+DÇ×ºqwÆüŠŸok±„ì¥YöIû‹Ú³ã%sšY4øı-!³°üz¹-ÔÉñ°<¼eÌwixª4CB!Ê€P/¶….PkVé¼5``½¼¿ÎÒQ0OQ‹Ş,o	˜œ€–GiKz¬äbİøb…¦¸äĞ
+ş¼œeêæFµäÑÅïœÉ¿äùTgÎNßÌ3?6şµ³ÕìqÛõCÙçãÿ|½f‚YëÖşõUO¡yc·ûìİ
+	ì_¦ÀÂÛ÷Ó`ğ{¿åƒ&ÿŒ?§¢îõÍsg 8 [¯emš/ÇR¿<ú®µ?Â3µ™½¯«[ö´lVªŠ[•Q¿Ğñ~%ı~ûf¶{ê «Ûî½bf'56¹ó¾Å‡Œ¼æÏïê¿~ªFÕ|ö^ü»÷¡ÁYĞ–ÛnßÜ¢tr2”=ÜÓ^ñ¢ÈDØÿğ‡´òAu•Ïÿm+H/ÂEø¸<2T.S>,ªêÙ Ÿôg
+Š3‰3“Z¤Œ‚9×U‚ìE¬G,0,ù¡hÄ¤hšÑù4dt6 Îá°ÅÔ7pî}
+g.*ŒbuI4ÁKrİá8lA0#fÓÎ0g¢ÆÅqÜiÕ} á•pMáHÈMNõl]ëM3^¼ESÎ¼„¦ô›ŠõÉHËÍ½^÷)q+²•\{®EIÆ#º¼<°òáÅÒoúÆú…h0©ÕdÓê<vÜoÉÈ-Õ]Tı1uaä‚Ä£†zE’cÌ+õ+Á{:dD=çàœª"eZ1FÑmŠ9tcì6CŒ¼‡ lò–F1VFâ6s…*äˆè^¿{Ø™Ò¿<‘¡şANÍ\ Î<BRÉ>ÙÜ¸ÇLê¹£w§==9
+şÙèĞ-5JŠ'ˆ?Ô3$IB`î-i}÷™å¢¤Í=E®¹XjâüÔdy8:iA”†ó¡XE±Ë304íSBÔ˜áM5˜9Ò¨SĞc3¤gL˜³ÇÑÒ}¦Ó^IîD2¤¨yà©CªÈÌONéûÜàmÃıòJ›N^h|«R¶\±OÁ‰Ñ©4¹ÃZÃüêFÙs;¥‹úŠ@?“ğÖñ]ï³	(Ã© ¥öğuašE•~•Í¤hÖ&Ó4• ­Ô¥óÉ+Õ„±N;ê»I€¤„·ZA:„)ëº Yp©O1F¤­"ÈQı`ö@­¢ÊáÅ™™ íÁë` Ü&NÀ§œb´µR*ğ§pÆN+D5:§ŒÜjQÕE…ºOˆH×¨â oT/Ö„jD=.˜Aˆâ¥µ‰›ãôÕ™è¹T7Dxw&á'µaehåå¸_¤‹Ø5ãÈ7§›àñ1¡Z´Ô?½Ğ…!Ò¥L«LoÔ!˜õ|>°g=Ì2ä$ü_£‰í«i—]m¯íT“¬\Tºu±İ´RğEw.¶SÆM7Éõ|˜ XeBQ"„Â€©%Úò=cĞë·@ÃŠµÀ2Í|± ¨ kCRMI×Bø{.NZEÓó—¸¹xÖq;eƒ|t1VŠÁDcñBpd'/.õQ´I1s¨JŞ$)Æ¨^ê¹ÏYĞÄŠbÃÇIªK)Äà´$Ü'féX.B½œù(øD‹<¹A<l¹'D^o*f&’I£’ƒI-dË‘Û¾Ôf<Ñƒö­EÜ7$òÑë¡ü2Ä»‡úİ‡±—OpS@ªœ@	‘/Ë>"ó-	§œv¡·óÅ3\.¥E.`.iqGğ,¿o;2¯è†sœNö¹K?§¡xRCÅ\2œ>ñÈİ~[·ç.G'é)v3_q*j…tÂ£}Pâ†«‡Ä©%‹¿rğéOn­şÂß­C.ø<°"õ\•¯£§ ^'e‘6+¬—²¯Pä4Sä+c°[à–‡mÎÙ‰ùé8!¬äG,‹MÊÌgÍËÌsß²Öf<4ïZGÂx]ÑDeÏ2LF¦¡ÓÂíê„z$s+¥@ôÌ1cî“nãp|¬ZjHc}©1H~â‹ıış“oŸkâÈş[xn6µ6	BÖíB#d—¸Ğ?¶ZVObßp|ş›4¹¡$ TñÆ‚zkê
+uİP2`gê>Ğñvİ¡X™â*è«%w‹Jä4ğĞeæG•¢ZN:×õ‰²"¬3äK5BAê½Ïâ2–lÖ.È¤íïÅSùz[ì¢ËR»¾ ÓêÛÅã"m[ógè­fw‚@Ms5ê}pšÃC¨	d
+úp¡nıAgê™3Â™¬™ovy†µ möjÑmUÑ”#åa<ğQøbÅ?Àñhy¿å+•Æ’§ÂóF_ˆúßN¼ÒwÎğV˜}ü:.Nî†«õ“DñÀ†m5Ò5”¼Yğ¾SREKY„ÇÀÄÓ¿xTW<‚åyÚÃU¬F
+ÃQ÷9EÂNâ¼ıRL”ÒéÓ½yË©Ñ`xš!P—a€ƒO¾¦#½9âhĞ{¦ñÅ0”KïÈáé*,6˜×ZçROŸo)–pBÎ ½Ñ,ÅæŠd²áÙÌGÁš>½V¢ÌßT% ëIÚ2ÈvëöéK…iÓB"LUyâÄST©¨’å’ÁùpÌèJÌ€	—àa/L¡˜€±+œ¡›4Ëì$dÈÙûÛÚ0@8.“²./0Œ—ÆlU‘y%ª‹5Ä´$õÃÏëÖT¹^¥éÄåËë`?ˆ‘xp‚.¦Ïw™£È™*­Ó«=o}Y€'Ï[‘HQÄn“™Lj¹aèâƒ«\Oã÷ê¶jùqë¶V2­ÖQÔ,š–6EÖÎZR°Mòµ4¹œ]j9¦I{vÁ$àµnS8Ö"°¨LÈµi‡ V7zª¤S€‡t‡¨M=FdSG6útğ¼±„@6"Aû¯RŒöÛğ’%ñQ†T«C]±2·éaŒ‘ıU€vªõ-…uÚ,'ÆÃ­D*“NÄ+:9ÀñNCĞ-'	d&ò¨dB×µ3íÉ#]ÃÔ>l
+Áøî¬ıâÉ‹EWÏ%Û£}ˆ’Ô³ñB+äQÜ!ğêxI Üj3]×‰)ã8º	¿6Qq(Ïš¤%%íf-_ß´ÃÌ/H=a‘±hî?’Ö2×ÕÏU€o…µWtÌæKK£YGÉpr
+$¢G%êHÊâ`Û^Ç&ÙÀ}@îÏTS1cY@"£§íV‘¯Qı§`—èZ™ÕÉ@ütıŠ€\'~*!eÓ!ª›İènĞß–.(í†ºm©O±;İ­˜´õÕ~ß¡İä½û£-c¦ëQ™Ø&ªIÍİÚu=`#´â1J™X¥@!`U].HÆ0Š¦ŠäÓÛ¡µiNˆ!äH‹\5Œhüàp+¿|¹•a¡ÎcVš^æ,•_LÏ˜ö4›Y/¯¢9ş!o,y¦O
+Ä	P®&OQ”á¤ÃwA§c[ËÙ¢ÚUİ÷Ø•{+‚NÔ”>–àg©5J3AÎ9§á0ßˆF)’ÒÀÃ„¹r”çuÛtÍ2û:<Xk0Ò2ê Yrs€ö¾³´U¡–ªœO¦$‹öùE¯ˆ2æÒFçø½ İÜã­G„±¸pã³; 3A=ÁZ²|šëtZ?êÆ
+®İ6:í6†½fL!çc²bÛ 2Ç"Q6l$Ü˜Ø	ŞÅ<ÂªÚ+ºxıCê­ÍÙXadªãè*F7•+’Ë,8ƒ­PÌ£iÒáYlœæ¼æ}mëõ×SpûxëŒ<ã-¦ñğº)3™[¾¸wh’Ú-º–'ló¹R¹òù1o³;çşß‘`&Ïˆf”@î%æ³6sú+ïV-
+Ìœfæ2®L4@80¶3öí&ñ=dˆú×„ˆ»àbàj˜†½“¨áFèE3mç®Ö¤ÛBĞğEã,]½áÿıägZ¡Š,ÓÍBÅğşU¾¤¤Ûÿ·Ã£èÆwß’r,mîªû	Ÿˆí€s ‚»>ò† QÏs¿\”_NË„ öJG7Ó©”$%mÚWéğ#™´uë†!•NgªMÀŠ|ålµU~ÜÇÙJXo%™B1‰?:FàF¿¥V‘XG[ûÎ#¼Ü6ÓşŠ‰b=]e%KUğ7¤Tùê[è*½líí¢¼^ñwBÄÂÿ1æÁÔ’“–›§ÁÏ·}Œ;ÛÊqÄuà(¼Y*Şv&6y¾Ì§²ms£Ğ¸!LzAk@,Ê–ÌÁ(è
+.ªrLv-B/İU2³l”Şùá'1×ø`Oÿ3¨‘FŒ•;b4¾Ìëe•G¿k™ZƒfZ ã2ŠKèãÙxY(=ÃÂ–ÆHØ½¼DúhÍè‹i.;h‹Õ—ºÕKåFœ”ÿ´íz>‹~ë1²¸Y×6Ä•ˆ¡y…`ÓG«Û#ñUMÖà%Ü¹üs/íz¢õXáL)¢_„ó/>2šĞlö£àzÍ‰‰ğ	B”2ëºÕj›K?€*øœjdÆ¾cÇ Å0DêÍkŠ‹¨Áj$B©`k$¡x„òU°ª]$S¯ã²Ülrs`¦¡’~¼5¿u/ÕIÙÙIëaJ¢¦^/B™¾qÆn€Î£«_-šˆV­$àñAAh?Ìş?Btªc±NÎÿ`¶9\d$
+Ì`À#H»–îåìIÖ&tIS:‡M|0@€:QeÇ‡8ÜP¬Ìy^5<F’ƒaşæ¨ïÅĞ:kú@ÌÊş£œ ß0´Û¥ÖVíbŠçnáyƒ²„Ù˜LftÛ¹Ô9§y¨Œ8‘É¼bìp¤‹­äpüÔ$kÄäKo7u–Îû»R±]òxš\6x¦£dŸ[	„¡YFjh[—,¡h"ì…gìüåt]5¸æ¥M¢VK6£Q3eQ^m_^Æ™·í‰µÎ‚¤Úâmdu—¯XŠå¢è"6Ëf"98-3$aŸ…>+¨¯òÙ"2FŸ$íæ‡Ö6h½T™au!üI‘\æË‡çºElè•ó_(Ş+r7ê–Ú÷H,µUÎd¾;å]9"kÆÌõ£t=æc•»5ƒ’ÒB×V•H„)ÎÇló§R‘2ËğÎàë­»×©­ŞVÛN€?<²5+¿uÊj.°áâÕö¹<’ÛÙ?f³ÙME)¯k–ŠM%¾L|ËÈÓÖi`ÑOƒ“ŞÌ‘¹e¤ ü¿ÑLí‘Ÿ}ÕSñ"HÒC^¼H(ºï±ĞD¨o5ô84o›Ìs²`pè7´_Q;pÒjÑ™&$R«ænÉ-Ãı.ğÖ©Ypµ„ÉDHV›Uœ$l rŒá1I€`ü ŒÒ˜­.ÜÊÂé›¬@*õŸ¤şWÕ1ğnC€¼§3Ÿ£a®Êô‡è  uG6Ğ9V"i÷° w½·†Ë”w%¦Ü=ïqìhXßOˆ=QZ>†AÑ¹§rôH?×æI·3”]–ª ÿ~û|A£!tnÍÓÀ!ÎrH„®Å÷§.íháwOÔ;ùh\ìÜLšïşP6t1Şÿ„„Š;KÔ<´ ¹3«D´›“Ì‘o,–G1g|\ÕK`@QB HÖØê%0Òj¾Y¾Á,/a®?hÏÄ[ÂÈ×íLüÆ{[¿šp–w¿YŠĞuÈÆısUù»kàÂOóÍrf¹sÑY¦Î3ñ–$ûÏYA˜r÷X¿š–<*ÿX€j‰×Tæ'ÀE	,²–ôÏöW®(éğfvJò#7cÏ¶náh\BÍ®ÂÄˆËÜå†¾´€n>G­ï*îë:uÍã÷¡¾ĞoâûNh&4ß½P;ÔÙø˜Ú€•¦u ĞşÄ` 0±£ãQ(jh/z:ğoÑ&2T‘fèØÑ\[×‡ôØİ–7Ö®ßº>pã'füYŸšpXk~/¶üñ¿]pÎÉí'= ùğ¶ŠŸ!ù!ÙÊx4r·°æÆ•ã,CÿLğß¦)W5ßşO'Ú[·XQ¿C\c÷G¦²øy™Ä²:("*ó;F5èµFB'ŠñK²wÌôC4İêzb(ô¡1ŸíI²¿uáÁÇAšr7ı×$UKÏb)L½óÏ5ÑTmºÅOªôŞ/,³ûcm?â`÷+^¬Æcm<éÒÛïˆ¹+’‹Û2­§Hïnáz¨9«^Ö˜tb“xû_Í2üêÿºD13‘ÏÎ‹İO?äÃè­=O–Ç÷r. Dª¦îÌ‚àÖ·v2«<øn~›–Bªápæ»‡7§ì®4»î;›>GİÕU=Öuù¾Çï@ŠP-ô×ø~òC14ØNDèÿz¡¥„:¨„áy|û„7M;„£é¹Só…ãx¼.UŠ%/|y¸%î3F}K«/sÖczá6~,€¶³)Ñ½š/í¤êÚÜ9ÑónO¢F¶ØVS(dYê—š›•¥Ú‘—ÊŠRÿJ„¡¾zr<w:S„ÙsÂàü»hÇ£‹°G¢G*
+IkymßÉ–±‰üÓMKŠ…h9TÃìá3bwÁ˜ßn¶áÉ¦¦Ö\Î¯Æ`‰­(Rê´¦Dåöd%N&Óİíš‹mÀS³§LyÅêµ²uR7“Ğ³³Hà\Ds$‚¹™gH"'U~£”ój”¼“<Êİ[å±¥:õ0ûè¥T)Ô¯Jú]Iª6¥½Ÿ¯3¶ÓâÓñŒ¤?U/vfd&~½3šıŠnT1±ã[H¦+r¦~íÑpÈ,‰ÑŠjVÊs+çÔ´”£9JZjÆjRè¾¬’­–Ö6´z’æ%ÍÓšÇ55¥A£A€3ŒŸ—!>òµU££¶p«î¦ƒCj°§_‰ë(Ø\Œä./8'xuĞëôçHÎ—(J<*q™ß
+²:*V¸Æ‹Û¦á»¹Ì…!¿ÇírZTÂG»I.øNP@iÉ/pömˆƒÚˆôL€öX-|$A? cXhÕÔñ©5ªÖ_‡6¢1â3Ó^h‚ø¬´×šùÎ–´
+¾„Ÿu6°|Q’²IÆ›f5M·zÓ‚Ş,‘­pŠ©7ıŠ¯,	° Ùp}Ë"ı\,j`¦eãfğ·Ì-y3óæñ,l;ŞY’rì¼»Kµš*°‚äü'®TÁŒgùøè›î8Ö™•t:2ÆôJiŸDFš$¤×E½œÕV”åVlgx°è‰q1ĞÊh.jßZ,5+¡¬]³3UÎ?XntØA..£‹ÌY?‘îö¯Srä™Ü?RŒŞ$®	B—(Ú–ËHÅd6ŸJ{µËÁs©í²òèÚv“àÍÃanİRÚ‘ë)´mà±²½Ú
+DQ†‚(XY?½¥Sˆ<KÖamÛ¦ÃêLu7¾3|eSül$]°fíTâ¾pBû
+¨€p7ˆ¹#¶æ¤ƒN=¢QƒĞ¹/aD^piÃÕ	'EçûŞ®UW;yçßD€¶$M½Âˆ›Û×:ù-ºÏ™9úyé¦W;zğó<0z¨ íñÇãÑeTºĞ=¼éù
+îıìWÀÏš­ÖÏ &Ö®ÇsOÃ5ı)‘iĞ»_ _Ë{á‘FÕæã›×ØZO|}Ú„f±³Í…\Ø…5ê‚zÆg…\¢„2Í‹]ŒÄ-FTMQi—¯hƒß—k18B3êTµªx¨YS¿vI~‡FÂ,r>aè:†`U"	E•"V#•R!ÿ ŠàJkxÊß(_ºŠµ›J	õÒ`v³›©¥rt<\ iè^¾zİÎopû*#½>8hD…~Eä;ÄPä|—ªÁ’¹Z8|lê|)•X]m¬åÜé8~îW¡…'äŠ8~pØ)*7<ş¢´fËyH§¾>#U™½fåy¡’gXtãcÖLœyv¢øcW¡šf¹ß·êæ&ZˆÉ8¼r1VÛ\Üüúa/ŞšJ|x15¬ßGŞóSøäåÒá‹Ò£EÏ7
+q”Ö£EÏbÕ°æ‡û°'¢~šPëÓƒQm5s­&M­MÆ³¤Ík‹õÔ|aØ—èÎ	áY18U»§€7?$Ï‹bÌÛÅE˜ÀS©Üœ»"‘òãsÎR–NÀº@>É÷İ»»Ö8gGœ£IRÇÖq¦¯“ĞŒ¥î)"Ş’,cì”GÇ°6ş`)¿¿ÉÔ4ê[Qßû|©éÂÂÀ›šCvdkÕ5İ)ğTÓâ!\òê»(zê›@†-yQx_w5‹å+Wipw»TcÂ,X4·Ï$† –‹øÉèì†(	Çëšç|Ç x“ÊÈ¶„1ó”K³yÖ¼Yå®òlt²Ú\ó0ØUí:7âË‰L¾"÷Ş7{ÙñŞ0‘ªşcaÅÖYkD:sÍs~ñ\ÑócÁ.ãæ%[y}÷wSæö}yì¡kØ=ú>EnD¹–DrÅš´jDP¿ctE“ñ'òŠÁaÆÃÍ•(½[¸dT&àif”ÀO7í#Ÿœ@ ©0|Ëº©&l
+B˜×œR·×0ÚQb–x‚ wk?_bæøÃ_yåv-îó©K,¤ÍiWàâ‚RhLm"§OSÅóDSkœ]9§£23ı³
+ ‡ùŠšŒh<ÄÃ[ërGŠÄàóï\'ª%R©ÄòK^!.Ó¡Ö¸W•Rå®¥‹MY¨n€»£†8‘E‰ÇKJPLÁá·<ø°v:´üá³s™b{´?Šä.Q]I¿³7h—RnòmCÇv­Tö÷÷½·ÏçOÂfÉŞ¯i’v›T‚ ù¢HğºkÛÉ»Y,nÜ<ÌÍ;î,øTìú³,qY8‘>KßşpğÇ—÷r
+ñ±’£Gv‚´üÖ¶ãv‘¯I-ÿö¡½‰`‰)¸_ÓŒ×é6_d¢Ö+•âİ¬™ıCÃ-…Âş:’ñW•é‘\Ú@Ø	¶,X fhfLc[vhj¾µ'45dŒÉÎsuÅi¤€)š}ğ$–i
+R«İ~½p€šÌ¥Lñ–í!P"ÃõQ9¾X_ L¬×iãn¡Ö0)^íCòeúÓÑ(ª¨âŒÍìÂ²'Â¨»…Ğ:³òH½ìËôPî&qN‡á8XJ¦/­É§KÉZ'Èm5Ú¼ºã¾ş2ûş{û•ñ„>‰ Kåó3;Öÿ!õÕ£(£1 ã¯œ2¦$°êÑ»µÜÙQ	Š[`çd¯H®w~8®J'Óı×ªï(‡eÓÒzÇ‹×L7·´ì¼š£@âãàÁS9©kO{^Uªå|’*?aqŸBu-H?5Ë|`&AH8vSM-ƒ2ø×™áÉxºÏ*š¥Vºèû4¹`…âH¥¤°$Ç`¡£Ùö6™"
+¿À97€‰ ¹Â(Y3¾0;ÌCÆ„ŞG§¹şwÒØ:¦ŸÚC³™ŒĞá+güXuh£œ5FªvI‹…ÈÒkÔE´Ã…e}ä‰ÁÕ=ŞXH´Ç aõ*ßŸÉCØdÀ\J8ô
+_’®ïŞ_˜s='J¢Sğ’ôõ®Csé-5êÂzúlòà«±Âw#ÉâÔXÔÀ$¤;ôTyddôéÒåe›×óÊE‘eüRtË,=E#eÓ–º´tö´ïzÑ"kê€ :ıÑµ*ö^ÑÍ<&< ¤é7TDÏ«¶çEn  [‹¨™wéß1ü¸‹úó¥ôã‡˜L"Ã¦C_Ò5 ƒ–‡ÿ¾Ïa>«êE:5¨QrôKÍ€–œ¹À±pµ^Y0Ã¬f²È‘~î~ÄB,ş‚SrÒR`Â´UÕØ1â ´çŸä˜a:]¯Ã!	^bÃ¼Jf)¸™­l×Ûœ’)ı~VAî"QoH§nBÿôœ?ïDjv€rU>à+ç)¹‘Ø•D&q’ÊÉÈ<Ş¨Ü îç³Kh›¬˜íaœ¥¼`Ô†±hÊ%ÒY?òX¤şE$•3-cÒeõ»-˜£Ä	Ë*V9k+äKÆQŸIdt5n‚#3áĞüR_Ã»¦ÙÎÎ`Æ¬eıÙuÄ)†ËzeÚÚU¼t€^Ñ	œ¹¨—ÇíÁÚíºCºR5d¦Í³Îl¥NH¬hºÓö¸ úñ˜"&yÄdgºŞÓcQ³cîƒ…Z1“-VÛÚ]0”ç:ÍJì¾y†-n±ÑæĞXÚ¸´.Áauy7üºÌ¨¢ìÖTšxµàq:,ÕŒ7âc<İE#ëüFcùJBÛ¯m¦ÌS[óyEĞ™ÍùØÀ™ç&xşôÂÀ¾§ÚèQK0ë¶SK\ÓŠôëñÅñø\oeÜ‹ ¿Ãx”W6È«±TÂæ ^&Z¯»G^Riã’è÷LAEK?`¦ªø»ÓÕ?LlQ:İIÕ`	^ëØÁxª€¢“H†aè“‘‚HÂukŸ ğùœúÿş”Q	`g³4šU°knce™éºª0
+§>w%nÍ§‡;‘ŞO0Å 4ÛÓrğÒlše•ÀıÄ§`c÷dj/|w‚IgÍr!ŸK,MÄ	Õ(Öè›"bŠÒ!ÜÿºİhFmtĞ>èFñğ’b©RF±ÁädåĞŠYG¢¤bıæl,¬¬	¬?º±’d%‰a^ò¼l<öôêFR6ë×ÀZò:Udº¼aÅˆ_«tºÁÃ1ÉD®T&‘Ë2à›r§1!yˆ¸¿³÷éL6¯%3èæB.›ÅBAàÕÿk­tA&&X±³€äQª‚ÆoÉİm¹İÖÀ–Àfğ1‘S"N8ØÙªmXp~AéûY¹i¯—¼§wO¢±ƒ°!Ü»’@Å †¬?¾«“‰ÁÂşD¡˜Ë;>Ÿù*GÈñ`ùm´®øöÍ‘vÌ·’Š5¨7Ÿ¶9VÃkÌ	ğbÕñ6-<Ä¾+&Îq
+×Q aÕ²GO¾P«ä3×\;TÈ-‚ö=‰nĞo1Ğ4|i°« ¤(DŒÇ½€Ñ4GÁ	ˆ3ì»Qf%¶Æ¬ÕãxN( –åRÆ{
+—æ½k‰@F3„Ëóá&Úğ¾İï¬ÀhƒÜ•¿åÇqĞ&ÌÌĞÔcDbù®„ñÊW…[Y%êsæ4=c$jÔœÿ­3œ÷¾s’ÿg°+)»‘¯~(¼¥H²|¼Q)Ï‘™ùÇÉ¿³[‹¡ÿ;¢†hÁœƒ>|54¥Ã¾Ó¤tnZ¥ĞÒ/¤­¥´
+ç™ãfîC{³ÁÎkàŒÀÙò—ËP‚`Ôşi¹êm øÙ—;Zùğşö­¡Ôy})²x0c…¾?›Àœ­t^ÚCËk+sKÕ4mÏdÒ)yS¹–.Ü9Ñ
+Ö]…‚¼¤ë»”ßÉ.á_*½Ç~¬gö=¥¹Ô™ÕÓíĞõ7
+YŠhD8w<^ë\šùN¹‚Â¿»]“¤P
+Ş"Ç…êÕ"1­«ØŠú†ÏZ¼?GãKüéAt)¯Äïa­5ÀJŠ²_Ø²FÂW.şG;­gö½˜üÉ¡ö»y*ØjëìŒ3ï[œ”Åö³‰kËš’QC7iÔ÷S·*Çi×¦gù¥ÀMª&BMÑ7ì7‡ËNªÍœ¿ÆâòC¿¾ÊúJ»#§RÏ6ægà+ShhìLa;æ®'àaµ}Ö<ÿ«8rmB`Ğ¯Ä>é~³¾©Œñx“£íäH(à^^ÎôÍ+@`+èÏtj–N¥zÔ%¯Æf¢h«?#¯›IE-DmÛÊa™¸qƒ˜ÒÕ4àOÊ9šhÆ¸†Iãô™Ö,xß~rì‚gÓæºú¤ÓµÕàã¡åÀy…ÏgH.g¦S”e·Fánä†ät¯ğ1Ö94ßï;oc)°ln|÷ùñ±÷Gt-8AÁÏ]$ˆ­dTÑæYÅ:¦¥¥¨¯€)Ql÷”`‰¾W9SÇu
+†ùéK¿·Ÿò§Ipºg ù]•7ÇÇ_§·‡d4¿|;Ÿ‡ª¿¼Ö[L /Ââƒ)D%•è'rÇäã­††ø‚4 `"kø$.;!øs9ëÚ^q­‡ãıj·…ZÁ„|¹­~Æ£°¼8œ³›$Í¼ØÍC(>:Û%?é 	ËĞ¨˜Ne'q=HP‡¹bc³A._~¥o—€Ù‚aÂõ/&f‘}¡©ªZOÎŞêhõ•òS˜mÁI›¦DS˜êppCBœP@º3)ß<¿Ê&“I”ò~tÊ³]œÉ±ÒôlÜÀóÖwıgkÅ±H/Aõ'ªfãO²÷õ;ãÕ…Oä…d"¤ı>jà‹[ÿêü“˜N,ì!'|·Sí‹ñuëµ:aF	&¼a«Œ½t…`á|Q®  L(GÜ$2c}¨¬Ğ—Kƒ0f£à´õ]È²ºNP¯4¬‘º¿ATfs§ùšA|®ÅK|9;¸>ÆŒzà!ŸHí¶­… ÜuC)èû`j ‚]£©ÕA¤É—ITöå¨`Ş~«T¢‡ªaéh¸S‚6¸mhÂä¡Ôåùj±ËyWKÅ˜Ô,ºoòãêûÌ±Æ®>¤»¬X’°f{	YJ¡ÁJË¢+‡1¢Öp	³ÌÅJşHo‡±=#ø8~$o+ü%fa>…(u ûÍc¢Ÿ2ş›|ån òAáFS5FİÀ\©qã½j‰>¡Y¤—7L)hÇ0B:hà€2&")ÁMm™Y—U+teËÉE„ùÃ«ä’°X4 Ÿ
+~Â»ƒó}ôÛPôÍŒq]b6`Z\Y…¹7Ao¨y…‚»™/.Guı>ëa¾ì3vû2ói9–=EÅ4’á …‹ÎŒÛ¬
+Mç±f½A±<­ÀÊ–ë8X…dÒäŒîÄóBŒ&tC,»¨#s«¦
+ÁÄ.îWË:,s?<œRFÇŸü•®Å^Ÿ…S‚(ò»ÍˆĞÌÛRLíŠ'åÖæ¹IãÃëü.şëxL¡Ï7pÆ]‚¦ŠlÚ#|µÉL¨Mºò¬õ¤ldo–í@È˜X¼ÄF¼\œVˆ8)
+¡j©qY¾"íŠ˜§ÁÃ¢=Hw9Jñı„Ä5K¹ÊQ(TÆ*J÷ËË}æ¨2fdy8g3M€¸ğõn­;ãô%²×hŠšğ–˜1µTYG–qƒ‹nÃ
+¸K
+,2§Xsa6Œn·)º—gµ^ì&¬£Ûõ8£›ş
+Q¾Ù6X=#ây*ng‚"ÛŒæÅ!,Ÿ›¹kQ¾ÀuNXšé^xÏÌ­vL,„š­)síã}Æ7P%êï$Ïå«½WÆs‹Ø6ËÂ˜VTNÃ‰ÕÕ•jÛ5¨\Y¢P¥}	5{°Ğ]d¢V³Dï›&÷|0ı]¡,ì.	 ¥íXß\ÌixR±øË£WÒ/ĞNÙ7 îg¤i¤Ûjÿ¦@Ş½”{$“ÜGÜîÔÿ±½\æóha*	¾ïz3e·øzò9éÖsox–‰–tßU@û,RŸ `;˜û?Ô¼7~S& za>bÄ’€FkcdÃT~A¾ø““ïÒ@«íäÕ­^âc¦r”úy>¯‡ÅeÅå	4®*ëXÖwÂYä±­WÎŞ<û…õ¬`ÎÆj%oò1Iı¶Ïùj”æíÃ&v£”²KCw½±¶º®I†1à´¢…_ı›Ì‰òûìè‘òË%«ºÂOb¨mY<öô¯ûUÉÒ_\uÍq”ğğ¢VÆìoRÛ§-wow»6­U3U(ºy%Õf3Ó“ÃâG×±Œ§¸ö;5Å¨)a›a+ÎYåêDM3™oÓŸóìjæ´>¯’fn®·EØ´ö^#Âıg›İJ]Èr[
+‡ê2·¶±T°9%jübPš÷§ÁQ–ÃÁÄ÷dT×ßa«qñ^¹VŞ#é3•¡i/¿•[nVÖæ= Ø|/F§Í|âŒøğ®îÏt·çÆå>R/g%5‹ÛwĞ‹#xT†Nö”â+nG²ù|	¥L™WUV0z‚ÅˆÄ|¦úMX]ÃYiÂVgNAĞ¥†òøéƒõSl(8Wg¦»*¹aYN÷D”ùŒÉfR>xcÓFßÿT‚¿{<`Ìì©ó£k İÑX*ƒ§^E9. rmˆÓ½ÙÎeuI¨sVw²öu¦›„ğc+{ùÂÂSít77<?ÛYjÚ(ÚŞJlR3³ÉäHĞP~:n=¯¸=ŸØ=âéáä«™lHI[D]Á§{4U	÷IÒèü‘æ”¹&µhÖ†ŠûÁmò5­Ûœ§Áè›"M“VÓjÃ	W¼°ğärç š.úÉ¢V¯×ië#ÁwNx2ÇãAÍí6şÚ6G%OJ5Ù=»‚öø­—KSæ¥„’Q”¦5Àü<ö?°ŠÆÌïØßŠÏƒ7–©UvKÇ¾ş5»_	oÍ¸}ºªlhcH”Ó$»Q—¬:ÈjÕ#õ’êG{lrñÅ*èZÁÊ'³cú1ktOÖ ®Ç=^'²fOcGNòÛ&tD‹ÑW$¯«–Ì€îDt³çdF(ƒí\8*iÚèß_ù?¿£x•µğSe/õÿê£Ãã°êE5ÀÊğã-©`íe®áw_Ù¨ùz!'üF¤‡RH&‘Ç^½E•ï%’±¯’†[ÏA¼@ez_¹|d!¾¿Ü o8óà|ø‰	×©Üƒl×S³Ëšñ€óé®y•ÏçöBB»-K…°Çã´%bÊ›	2w&Æë’Îí ³íGxP¸”•OFjúA‹Ñ´Õ_Ùjs¦’ÍdG£z†³ƒÆ+ ”‘ ;ÎµC©tCÒÖe9ä³³ö¼ÈŠÆ®»Ú
+—F!‡&ãñœL9g•Yóa1İ‘ˆø¼‘ÒØè½P±Ä‰W_=ÆŸ™ä×²+øañ£/Í@ü‘Â€iG:ÛçÏa÷°'É¸×O.vxtøiÛù·@ôœÏz#uã¸YBŞiä$B©VÍTš9\RYóÓÃ¯DOçQxµ]h»áœšbì’‚Œ74 îI#7­^åÌx9`k[¹uîl¨KY‘üi³l¸¿‰+µªi˜$%URB»”E)Qèë˜Ú—ë­­eà3ÉCbäÈV©±½ øgBW²}sõ›¿ŞÇ b÷®ae®%®ÜI/8µ+Z©É§VgL5mùL-nEòç’Öê%¤¶ò¨@m£9)r¢×Ò´.A·>˜´¬:r?Ügm¢İí[ñŒ~Ü¸øÖJª=½e3|­d	˜*ËXyòÎZäŠ
+¤qè|Ñö’V.RNû"«ËÃŸùN“+\Ù?fJH÷3|=—ãÆHYŠ!=Õó¼lÁƒ¡Õâ°ªœyÍÈ*/Ë‡Í° 1Õ(ÌHÑ{eÌ\XÈ¹2‚˜Öo-¤ET0M• ¬51împpk³…‰½^Û3ş:æ×]H(JCÆ‹ÅÜ¶L»İ‰˜1‘mu¬TàşÇ ãÿ¶àc@!%zcAåca+;-lô>l‹¹sxd$0)ãÛ/Û…ĞnU4s¼dĞ›Z°‹¹¶G¡d{hcF{;µr²›‹çÎ~¥Føkæ\¤]':[„ÔÓe­ø®œhlÅKHWÚj/p¬™>TnÜcÅ·—ßT,Z¯.´>!]ïşéI/Üéßİmh§ïY³zŠd  æş¥óßäË÷›ÆzŸß²êşòÛÓÿÑ©âîİ×¤‚m€$…±ïùå|…È„Å6?¯Îˆ:Úv¹ÇW=Ö{­!›ü·}ãÓÕ#7uŞ¯Ñ4î7ÓÄÎ+?+íua¼¥…êš!L0ĞOèÛt%ÓŸé;>KZLÈşÔElwÎŠ´N«qÑ”¯6ò³€3«F´“¼Î—/F¥[}ºØ;W#iÒKùìèÉ¬zî•>ÓğV¯Ûó	h·ÖŞf~?ïšOól}Ë;Á™İöü8Ùkî)zHš¯ÔŒ^&
+9–¯+ûXÛùVMa¾·ÜU]¶7Õwi‘ù6×aÉÔÀÉAËšÑá`Í/ï§A@¶³2›ëÙO Œ‰tî¹?jä.šK*ÿT†ôaúG¶Z·ªiåèü)îÛï>®nCCi³Ø’w˜!C¶CÅF®%'Y§z^ÍÚähæ£©g5[{xˆ¥æ¿I8oŞV"nÙÏ·•·¿t©#YE?YÈ÷¢d®kÚvŒ´¾À›æÜÊó‚:²ê˜E¬ÚÊÓ &ûyYß^'y‘c-¬µ •™Z{3[äW1'¬l¬Şªc[°jKöÁN¯±LÕì(ßUû~‰NVê•ªô	Ñî—x–ÛZd‰¢šYf,ì*Å şÚ¼T§_Ôğò~u²Òşo`rÏfÅ¶"*Ìø1õvdªûæjÊ€®6#1tä¹z¥²™7ºw¬ß¿”f_xí'ûïsœayœ½šúiÛ83(ç^›_Ú¡ŸÿU~š<ÜyİŸí•O=ÛßÎO`PsÎBÉ°×–5¤s¬Hw{òë 0¿, Üµ@ÙÀXDŒD¿Â"KRĞ!yŠ å1Ò«æœ×aáäª%±ÃK³ÃH3âpNÁ¹œI\1bm•9F½&›ŞÇøv|´úH0-µFr¥Tî>Z]ŞBCSØ––M\²¤/ª3-\²§;ÊR FÏ:’A¶ÁîRJ9;Êë… ²”Ò1Z‹ñÀf·³ÄæºÓ©æ‚Èàh©WŸ+¯é—¯ûvÖR)ƒ‘ŸN¢CÁõò©¢ˆ¸–¨jù¬ÒüY
+ìu„¬ukI­wêz1ååK¬Í•×!£.ä–öÈ’³ÈF(IÒ…>°İr^ÌPS‡ıq:Ï¢•…Ó*Lyƒ­/YWh!íË
+4£u¯8*½C8eòçxaRæx;^   Zfont/woff2_^https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTS-mu0SC55I.woff2O
+ebplist00Ô
+X$versionY$archiverT$topX$objects † _NSKeyedArchiverÑ	_WebResourceResponse€¯)'-.4567[\]^_`abcdefghijklmnopqrstuvwx|}U$nullİ !"#$%&___nsurlrequest_proto_prop_obj_6___nsurlrequest_proto_prop_obj_3R$2___nsurlrequest_proto_prop_obj_0R$3___nsurlrequest_proto_prop_obj_4V$class___nsurlrequest_proto_prop_obj_1R$4R$0___nsurlrequest_proto_prop_obj_5___nsurlrequest_proto_prop_obj_2R$1€'€€	€€(€€ €Ó()$+,WNS.base[NS.relative€ €€_^https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTS-mu0SC55I.woff2Ò/012Z$classnameX$classesUNSURL¢13XNSObject#AÄë=Ù”–ÿ ÈÓ89:JZWNS.keysZNS.objects¯;<=>?@ABCDEFGHI€	€
+€€€€€€€€€€€€€¯KLMNOPLRSTUVWXY€€€€€€€€€€ €!€"€#€$€%€&\Content-Type_Access-Control-Allow-OriginSAge_X-XSS-Protection_Cross-Origin-Resource-PolicyWExpires_Timing-Allow-Origin]Cache-ControlTDate^Content-Length_#Content-Security-Policy-Report-Only_X-Content-Type-Options]Accept-RangesX__hhaa__]Last-ModifiedZfont/woff2Q*V229132Q0\cross-origin_Wed, 27 Mar 2024 10:31:03 GMT_public, max-age=31536000_Tue, 28 Mar 2023 10:31:03 GMTU39372_Yrequire-trusted-types-for 'script'; report-uri https://csp.withgoogle.com/csp/apps-themesWnosniffUbytes_°
+
+YnBsaXN0MDDeAQIDBAUGBwgJCgsMDQ4PERMVFxkbHB4gIiQmKFxDb250ZW50LVR5cGVfEBtBY2Nlc3MtQ29udHJvbC1BbGxvdy1PcmlnaW5TQWdlXxAQWC1YU1MtUHJvdGVjdGlvbl8QHENyb3NzLU9yaWdpbi1SZXNvdXJjZS1Qb2xpY3lXRXhwaXJlc18QE1RpbWluZy1BbGxvdy1PcmlnaW5dQ2FjaGUtQ29udHJvbFREYXRlXkNvbnRlbnQtTGVuZ3RoXxAjQ29udGVudC1TZWN1cml0eS1Qb2xpY3ktUmVwb3J0LU9ubHlfEBZYLUNvbnRlbnQtVHlwZS1PcHRpb25zXUFjY2VwdC1SYW5nZXNdTGFzdC1Nb2RpZmllZKEQWmZvbnQvd29mZjKhElEqoRRWMjI5MTMyoRZRMKEYXGNyb3NzLW9yaWdpbqEaXxAdV2VkLCAyNyBNYXIgMjAyNCAxMDozMTowMyBHTVShEqEdXxAYcHVibGljLCBtYXgtYWdlPTMxNTM2MDAwoR9fEB1UdWUsIDI4IE1hciAyMDIzIDEwOjMxOjAzIEdNVKEhVTM5MzcyoSNfEFlyZXF1aXJlLXRydXN0ZWQtdHlwZXMtZm9yICdzY3JpcHQnOyByZXBvcnQtdXJpIGh0dHBzOi8vY3NwLndpdGhnb29nbGUuY29tL2NzcC9hcHBzLXRoZW1lc6ElV25vc25pZmahJ1VieXRlc6EpXxAdTW9uLCAxNSBBdWcgMjAyMiAxODoyMDo0OCBHTVQACAAlADIAUABUAGcAhgCOAKQAsgC3AMYA7AEFARMBIQEjAS4BMAEyATQBOwE9AT8BQQFOAVABcAFyAXQBjwGRAbEBswG5AbsCFwIZAiECIwIpAisAAAAAAAACAQAAAAAAAAAqAAAAAAAAAAAAAAAAAAACSw==_Mon, 15 Aug 2022 18:20:48 GMTÒ/0yz_NSMutableDictionary£y{3\NSDictionaryZfont/woff2Ò/0~_NSHTTPURLResponse£€3_NSHTTPURLResponse]NSURLResponse    $ ) 2 7 I L b d  – ± Ó õ ø?Fhkn²µ·¹»½¿ÁÃÅÆÈÊÌÎÕİéëíïPU`ior{„†ˆ—¢´¶¸º¼¾ÀÂÄÆÈÊÌÎĞÒäæèêìîğòôöøúüş /3Femƒ‘–¥Ëäòû	,Lg‡éñ÷«ËĞæê÷					3             ‚              	A            1   <   N   d   ‚   ‘   ¨  lÜ  læ  lì  m/  m0  m4  m?  mU  ’º  ’Ã  ’É  “*   %   0  ¶Š  ¶Ó  ¿L  ¿U Y% Y0 Y‘                          cú
