@@ -1,0 +1,27 @@
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: rabbitmq
+  name: rabbitmq-internal
+  labels:
+    app: rabbitmq
+spec:
+  clusterIP: None
+  ports:
+    - name: epmd
+      protocol: TCP
+      port: 4369
+    - name: amqp
+      protocol: TCP
+      port: 5672
+    - name: amqp-tls
+      protocol: TCP
+      port: 5671
+    - name: http
+      protocol: TCP
+      port: 15672
+    - name: inter-node-cli
+      protocol: TCP
+      port: 25672
+  selector:
+    app: rabbitmq 

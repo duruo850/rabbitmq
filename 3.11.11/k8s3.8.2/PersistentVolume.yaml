@@ -1,0 +1,45 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: rabbit-pv1
+  labels:
+    type: rabbitmq
+spec:
+  storageClassName: rabbitmq
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/opt/rabbitmq_data1"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: rabbit-pv2
+  labels:
+    type: rabbitmq
+spec:
+  storageClassName: rabbitmq
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/opt/rabbitmq_data2"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: rabbit-pv3
+  labels:
+    type: rabbitmq
+spec:
+  storageClassName: rabbitmq
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/opt/rabbitmq_data3"

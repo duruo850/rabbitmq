@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+# See the Prerequisites section of https://www.rabbitmq.com/cluster-formation.html#peer-discovery-k8s.
+kind: StatefulSet
+metadata:
+  name: rabbitmq
+  namespace: rabbitmq
+spec:
+  serviceName: rabbitmq-internal
+  # Three nodes is the recommended minimum. Some features may require a majority of nodes
+  # to be available.
+  replicas: 3
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      serviceAccountName: rabbitmq
+      terminationGracePeriodSeconds: 10
+      nodeSelector:
+        # Use Linux nodes in a mixed OS kubernetes cluster.
+        # Learn more at https://kubernetes.io/docs/reference/kubernetes-api/labels-annotations-taints/#kubernetes-io-os
+        kubernetes.io/os: linux
+      initContainers:
+        - name: fix-readonly-config
+          image: busybox:1.31.1
+          command:
+            - sh
+            - -c
+            - cp /tmp/config/* /etc/rabbitmq;
+          volumeMounts:
+            - name: rabbitmq-config
+              mountPath: /etc/rabbitmq
+            - name: tmp-dir
+              mountPath: /tmp/config
+      containers:
+        - name: rabbitmq
+          image: rabbitmq:3.8.2
+          # Learn more about what ports various protocols use
+          # at https://www.rabbitmq.com/networking.html#ports
+          ports:
+            - name: epmd
+              protocol: TCP
+              containerPort: 4369
+            - name: amqp
+              protocol: TCP
+              containerPort: 5672
+            - name: amqp-tls
+              protocol: TCP
+              containerPort: 5671
+            - name: http
+              protocol: TCP
+              containerPort: 15672
+          livenessProbe:
+            exec:
+              # This is just an example. There is no "one true health check" but rather
+              # several rabbitmq-diagnostics commands that can be combined to form increasingly comprehensive
+              # and intrusive health checks.
+              # Learn more at https://www.rabbitmq.com/monitoring.html#health-checks.
+              #
+              # Stage 2 check:
+              command: ["rabbitmq-diagnostics", "status"]
+            initialDelaySeconds: 60
+            # See https://www.rabbitmq.com/monitoring.html for monitoring frequency recommendations.
+            periodSeconds: 60
+            timeoutSeconds: 15
+          readinessProbe:
+            exec:
+              # This is just an example. There is no "one true health check" but rather
+              # several rabbitmq-diagnostics commands that can be combined to form increasingly comprehensive
+              # and intrusive health checks.
+              # Learn more at https://www.rabbitmq.com/monitoring.html#health-checks.
+              #
+              # Stage 2 check:
+              command: ["rabbitmq-diagnostics", "status"]
+              # To use a stage 4 check:
+              # command: ["rabbitmq-diagnostics", "check_port_connectivity"]
+            initialDelaySeconds: 20
+            periodSeconds: 60
+            timeoutSeconds: 10
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: RABBITMQ_NODENAME
+              value: rabbit@$(POD_NAME).rabbitmq-internal.$(POD_NAMESPACE).svc.cluster.local
+            - name: RABBITMQ_USE_LONGNAME
+              value: "true"
+          envFrom:
+            - secretRef:
+                name: rabbitmq-secret
+          volumeMounts:
+            - name: rabbitmq-config
+              mountPath: /etc/rabbitmq
+            - name: rabbitmq-data
+              mountPath: /var/lib/rabbitmq
+      volumes:
+        - name: rabbitmq-config
+          emptyDir: {}
+        - name: tmp-dir
+          configMap:
+            name: rabbitmq-config
+  volumeClaimTemplates:
+    - metadata:
+        name: rabbitmq-data
+        namespace: rabbitmq
+        labels:
+          app: rabbitmq
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: 20Gi
