@@ -11,6 +11,7 @@ start() {
     sudo kubectl create -f Namespace.yaml
     sudo kubectl create -f PersistentVolume.yaml
     sudo kubectl create -f Rbac.yaml
+    sudo kubectl create -f Secret.yaml
     sudo kubectl create -f Config.yaml
     sudo kubectl create -f Statefulset.yaml
     sudo kubectl create -f Service.yaml
@@ -21,6 +22,7 @@ stop() {
     sudo kubectl delete -f Service.yaml
     sudo kubectl delete -f Statefulset.yaml
     sudo kubectl delete -f Config.yaml
+    sudo kubectl delete -f Secret.yaml
     sudo kubectl delete -f Rbac.yaml
     sudo kubectl delete -f PersistentVolume.yaml
     sudo kubectl delete -f Namespace.yaml
