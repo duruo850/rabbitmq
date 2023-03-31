@@ -20,6 +20,45 @@
     可以找个网站处理一下
     
     
+## 集群配置说明：
+
+      ## Cluster formation. See https://www.rabbitmq.com/cluster-formation.html to learn more.
+      cluster_formation.randomized_startup_delay_range.min = 0
+      cluster_formation.randomized_startup_delay_range.max = 1
+      cluster_formation.peer_discovery_backend  = rabbit_peer_discovery_k8s
+      cluster_formation.k8s.host = kubernetes.default.svc.cluster.local
+      ## Service name is rabbitmq by default but can be overridden using the cluster_formation.k8s.service_name key if needed
+      cluster_formation.k8s.service_name = rabbitmq-internal
+      ## It is possible to append a suffix to peer hostnames returned by Kubernetes using cluster_formation.k8s.hostname_suffix
+      cluster_formation.k8s.hostname_suffix = .rabbitmq-internal.rabbitmq.svc.cluster.local
+      ## Should RabbitMQ node name be computed from the pod's hostname or IP address?
+      ## IP addresses are not stable, so using [stable] hostnames is recommended when possible.
+      ## Set to "hostname" to use pod hostnames.
+      ## When this value is changed, so should the variable used to set the RABBITMQ_NODENAME
+      ## environment variable.
+      cluster_formation.k8s.address_type = hostname
+      ## How often should node cleanup checks run?
+      cluster_formation.node_cleanup.interval = 30
+      ## Set to false if automatic removal of unknown/absent nodes
+      ## is desired. This can be dangerous, see
+      ##  * https://www.rabbitmq.com/cluster-formation.html#node-health-checks-and-cleanup
+      ##  * https://groups.google.com/forum/#!msg/rabbitmq-users/wuOfzEywHXo/k8z_HWIkBgAJ
+      cluster_formation.node_cleanup.only_log_warning = true
+      cluster_partition_handling = autoheal
+      ## See https://www.rabbitmq.com/ha.html#master-migration-data-locality
+      queue_master_locator=min-masters
+      ## This is just an example.
+      ## This enables remote access for the default user with well known credentials.
+      ## Consider deleting the default user and creating a separate user with a set of generated
+      ## credentials instead.
+      ## Learn more at https://www.rabbitmq.com/access-control.html#loopback-users
+      loopback_users.guest = false
+      ## https://www.rabbitmq.com/memory.html#configuring-threshold
+      vm_memory_high_watermark.relative = 0.6
+      
+      
+      cluster_formation.k8s.address_type：从k8s返回的Pod容器列表中计算对等节点列表，这里只能使用主机名，官方示例中是ip，
+      但是默认情况下在k8s中pod的ip都是不固定的，因此可能导致节点的配置和数据丢失，后面的yaml中会通过引用元数据的方式固定pod的主机名。
     
 ## pod起来以后可以exec -it进入查看Secret 配置的export信息：
     qiteck@server:~/program/rabbitmq/3.11.11/k8s$ sudo kubectl exec -it rabbitmq-0 -n rabbitmq -- /bin/bash
@@ -48,5 +87,6 @@
     declare -x RABBITMQ_DEFAULT_PASS="rbmqu0101081710"
     declare -x RABBITMQ_DEFAULT_USER="system"
     declare -x RABBITMQ_ERLANG_COOKIE="123j19uedas7dad81023j139dja"
+    
     
    
