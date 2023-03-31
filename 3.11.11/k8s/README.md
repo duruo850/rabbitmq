@@ -44,11 +44,11 @@
     qiteck@server:~/program/rabbitmq/3.11.11/k8s$ sudo kubectl exec -it rabbitmq-0 -n rabbitmq -- /bin/bash
     
     mqtt服务已经添加，但是mqtt用户需要手动添加
-    admin_user=mqtt_admin;
-    admin_passwd=rbmqmqtt_07231816;
-    rabbitmqctl add_user $admin_user $admin_passwd; 
-    rabbitmqctl set_user_tags mqtt_admin administrator; 
-    rabbitmqctl set_permissions -p / mqtt_admin ".*" ".*" ".*"; 
+    admin_user=mqtt_admin
+    admin_passwd=rbmqmqtt_07231816
+    rabbitmqctl add_user $admin_user $admin_passwd
+    rabbitmqctl set_user_tags mqtt_admin administrator
+    rabbitmqctl set_permissions -p / mqtt_admin ".*" ".*" ".*"
     
     // 这个不支持，后面看下怎么弄
     rabbitmqadmin -u $admin_user -p $admin_passwd declare exchange --vhost='/' name=exchange_mqtt_topic type=topic auto_delete=false durable=true;
