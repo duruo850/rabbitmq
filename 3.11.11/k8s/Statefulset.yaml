@@ -41,6 +41,9 @@ spec:
           # Learn more about what ports various protocols use
           # at https://www.rabbitmq.com/networking.html#ports
           ports:
+            - name: mqtt
+              protocol: TCP
+              containerPort: 1883
             - name: epmd
               protocol: TCP
               containerPort: 4369

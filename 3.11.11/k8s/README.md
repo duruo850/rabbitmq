@@ -44,7 +44,6 @@
     mqtt服务已经添加，但是mqtt用户需要手动添加
     admin_user=mqtt_admin;
     admin_passwd=rbmqmqtt_07231816;
-    rabbitmq-plugins enable --online rabbitmq_mqtt rabbitmq_web_mqtt; 
     rabbitmqctl add_user $admin_user $admin_passwd; 
     rabbitmqctl set_user_tags mqtt_admin administrator; 
     rabbitmqctl set_permissions -p / mqtt_admin ".*" ".*" ".*"; 

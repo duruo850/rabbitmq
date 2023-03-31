@@ -8,6 +8,9 @@ metadata:
 spec:
   clusterIP: None
   ports:
+    - name: mqtt
+      protocol: TCP
+      port: 1883
     - name: epmd
       protocol: TCP
       port: 4369
@@ -36,6 +39,10 @@ metadata:
 spec:
   type: NodePort
   ports:
+    - name: mqtt
+      protocol: TCP
+      port: 1883
+      nodePort: 1883
     - name: amqp
       protocol: TCP
       port: 5672
