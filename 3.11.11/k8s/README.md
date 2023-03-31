@@ -65,4 +65,20 @@
 
 ## 集群验证：
     rabbitmqctl cluster_status 
+    
+
+
+## 集群验证--日志：
+    
+    2021-02-17 03:31:13.467 [info] <0.9.0> Server startup complete; 5 plugins started.
+     * rabbitmq_peer_discovery_k8s
+     * rabbitmq_management
+     * rabbitmq_web_dispatch
+     * rabbitmq_management_agent
+     * rabbitmq_peer_discovery_common
+     completed with 5 plugins.
+    2021-02-17 03:32:30.060 [info] <0.566.0> node 'rabbit@rabbitmq-cluster-1.rabbitmq-cluster.default.svc.cluster.local' up
+    2021-02-17 03:32:31.264 [info] <0.566.0> rabbit on node 'rabbit@rabbitmq-cluster-1.rabbitmq-cluster.default.svc.cluster.local' up
+    2021-02-17 03:33:31.280 [info] <0.566.0> node 'rabbit@rabbitmq-cluster-2.rabbitmq-cluster.default.svc.cluster.local' up
+    2021-02-17 03:33:32.627 [info] <0.566.0> rabbit on node 'rabbit@rabbitmq-cluster-2.rabbitmq-cluster.default.svc.cluster.local' up
    
