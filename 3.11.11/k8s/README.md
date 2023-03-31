@@ -38,6 +38,17 @@
     
     集群重启以后，需要把pv的数据删除，不然会出现问题
     sudo rm -rf /opt/rabbitmq_data*
+    
+## MQTT配置支持：
+    
+    mqtt服务已经添加，但是mqtt用户需要手动添加
+    admin_user=mqtt_admin;
+    admin_passwd=rbmqmqtt_07231816;
+    rabbitmq-plugins enable --online rabbitmq_mqtt rabbitmq_web_mqtt; 
+    rabbitmqctl add_user $admin_user $admin_passwd; 
+    rabbitmqctl set_user_tags mqtt_admin administrator; 
+    rabbitmqctl set_permissions -p / mqtt_admin ".*" ".*" ".*"; 
+    rabbitmqadmin -u $admin_user -p $admin_passwd declare exchange --vhost='/' name=exchange_mqtt_topic type=topic auto_delete=false durable=true;
   
     
 ## pod起来以后可以exec -it进入查看Secret 配置的export信息：
