@@ -49,6 +49,8 @@
     rabbitmqctl add_user $admin_user $admin_passwd; 
     rabbitmqctl set_user_tags mqtt_admin administrator; 
     rabbitmqctl set_permissions -p / mqtt_admin ".*" ".*" ".*"; 
+    
+    // 这个不支持，后面看下怎么弄
     rabbitmqadmin -u $admin_user -p $admin_passwd declare exchange --vhost='/' name=exchange_mqtt_topic type=topic auto_delete=false durable=true;
   
     
