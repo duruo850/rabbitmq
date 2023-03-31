@@ -37,7 +37,7 @@ spec:
               mountPath: /tmp/config
       containers:
         - name: rabbitmq
-          image: rabbitmq:3.8.2
+          image: rabbitmq:3.11.11
           # Learn more about what ports various protocols use
           # at https://www.rabbitmq.com/networking.html#ports
           ports:
