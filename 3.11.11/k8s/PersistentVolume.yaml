@@ -6,7 +6,7 @@ metadata:
   labels:
     type: rabbit
 spec:
-  storageClassName: rabbit
+  storageClassName: rabbitmq
   capacity:
     storage: 10Gi
   accessModes:
@@ -21,7 +21,7 @@ metadata:
   labels:
     type: rabbit
 spec:
-  storageClassName: rabbit
+  storageClassName: rabbitmq
   capacity:
     storage: 10Gi
   accessModes:
@@ -36,7 +36,7 @@ metadata:
   labels:
     type: rabbit
 spec:
-  storageClassName: rabbit
+  storageClassName: rabbitmq
   capacity:
     storage: 10Gi
   accessModes:
