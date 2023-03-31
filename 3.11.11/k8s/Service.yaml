@@ -25,7 +25,7 @@ spec:
       port: 25672
   selector:
     app: rabbitmq
----------------------------
+---
 kind: Service
 apiVersion: v1
 metadata:
