@@ -33,6 +33,12 @@
       
       cluster_formation.k8s.address_type：从k8s返回的Pod容器列表中计算对等节点列表，这里只能使用主机名，官方示例中是ip，
       但是默认情况下在k8s中pod的ip都是不固定的，因此可能导致节点的配置和数据丢失，后面的yaml中会通过引用元数据的方式固定pod的主机名。
+      
+## 集群重启说明：
+    
+    集群重启以后，需要把pv的数据删除，不然会出现问题
+    sudo rm -rf /opt/rabbitmq_data*
+  
     
 ## pod起来以后可以exec -it进入查看Secret 配置的export信息：
     qiteck@server:~/program/rabbitmq/3.11.11/k8s$ sudo kubectl exec -it rabbitmq-0 -n rabbitmq -- /bin/bash
