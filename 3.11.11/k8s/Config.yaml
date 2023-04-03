@@ -45,8 +45,8 @@ data:
       ## Relevant doc guide: https://rabbitmq.com/access-control.html
       ##
       default_vhost = /
-      default_user = system
-      default_pass = rbmqu0101081710
+      default_user = aaaaa
+      default_pass = 11111
 
 
 

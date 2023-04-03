@@ -15,7 +15,7 @@
 
 ## Secret.yaml里面填的数据需要经过base64处理：
     
-    ubuntu下base64处理： echo "rbmqu0101081710" | base64  ==> 这个base64会多个换行符, 解决方案再说
+    ubuntu下base64处理： echo "aaaaaa" | base64  ==> 这个base64会多个换行符, 解决方案再说
     
     可以找个网站处理一下
     
@@ -78,8 +78,8 @@
     declare -x POD_NAMESPACE="rabbitmq"
     declare -x PWD="/"
     declare -x RABBITMQ_DATA_DIR="/var/lib/rabbitmq"
-    declare -x RABBITMQ_DEFAULT_PASS="rbmqu0101081710"
-    declare -x RABBITMQ_DEFAULT_USER="system"
+    declare -x RABBITMQ_DEFAULT_PASS="111111"
+    declare -x RABBITMQ_DEFAULT_USER="aaaaaa"
     declare -x RABBITMQ_ERLANG_COOKIE="123j19uedas7dad81023j139dja"
     
 
