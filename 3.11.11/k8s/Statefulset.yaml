@@ -37,7 +37,7 @@ spec:
               mountPath: /tmp/config
       containers:
         - name: rabbitmq
-          image: rabbitmq:3.11.11
+          image: duruo850/rabbitmq:3.11.11-management-alpine
           # Learn more about what ports various protocols use
           # at https://www.rabbitmq.com/networking.html#ports
           ports:
