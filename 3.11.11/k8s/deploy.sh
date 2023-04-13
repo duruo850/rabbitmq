@@ -23,6 +23,11 @@ stop() {
     sudo kubectl delete -f Service.yaml
     sudo kubectl delete -f LimitRange.yaml
     sudo kubectl delete -f Statefulset.yaml
+
+    # pvc需要手动删除
+    # 1.23以后可以通过persistentVolumeClaimRetentionPolicy控制
+    sudo kubectl delete pvc rabbitmq-data-rabbitmq-0 rabbitmq-data-rabbitmq-1 rabbitmq-data-rabbitmq-2 -n rabbitmq
+
     sudo kubectl delete -f Config.yaml
     sudo kubectl delete -f Secret.yaml
     sudo kubectl delete -f Rbac.yaml
