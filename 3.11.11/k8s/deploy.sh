@@ -27,7 +27,6 @@ stop() {
     sudo kubectl delete -f Secret.yaml
     sudo kubectl delete -f Rbac.yaml
     sudo kubectl delete -f PersistentVolume.yaml
-    sudo kubectl delete -f Namespace.yaml
     sudo rm -rf /opt/rabbitmq_data*
 }
 
