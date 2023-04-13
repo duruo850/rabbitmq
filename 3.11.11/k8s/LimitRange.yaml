@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default
+  namespace: rabbitmq
+spec:
+  limits:
+  - default:
+      cpu: 500m
+      memory: 500Mi
+    defaultRequest:
+      cpu: 5m
+      memory: 20Mi
+    max:
+      cpu: 500m
+      memory: 500Mi
+    min:
+      cpu: 5m
+      memory: 20Mi
+    type: Container

@@ -9,6 +9,7 @@ push(){
 start() {
     echo "start..."
     sudo kubectl create -f Namespace.yaml
+    sudo kubectl create -f LimitRange.yaml
     sudo kubectl create -f PersistentVolume.yaml
     sudo kubectl create -f Rbac.yaml
     sudo kubectl create -f Secret.yaml
@@ -20,6 +21,7 @@ start() {
 stop() {
     echo "stop..."
     sudo kubectl delete -f Service.yaml
+    sudo kubectl delete -f LimitRange.yaml
     sudo kubectl delete -f Statefulset.yaml
     sudo kubectl delete -f Config.yaml
     sudo kubectl delete -f Secret.yaml
